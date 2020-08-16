@@ -365,7 +365,7 @@ void init_torus() {
 	Object obj2 = {};
 	obj2.mesh = torus;
 	obj2.material = MaterialType::BRASS;
-	obj2.shading = ShadingType::BLINN; // GOURAUD;
+	obj2.shading = ShadingType::PHONG; // GOURAUD;
 	obj2.name = "Torus";
 	obj2.M = glm::translate(glm::mat4(1), glm::vec3(5., 0., 5.));
 	objects.push_back(obj2);
@@ -502,9 +502,28 @@ void init() {
 	glUniform1f(light_uniforms[GOURAUD].light_power_pointer, light.power);
 
 	//Phong Shader loading
-    // TODO
+    shaders_IDs[BLINN] = initShader(ShaderDir + "v_phong.glsl", ShaderDir + "f_phong.glsl");
+    base_unif.P_Matrix_pointer = glGetUniformLocation(shaders_IDs[BLINN], "P");
+    base_unif.V_Matrix_pointer = glGetUniformLocation(shaders_IDs[BLINN], "V");
+    base_unif.M_Matrix_pointer = glGetUniformLocation(shaders_IDs[BLINN], "M");
+    base_uniforms[ShadingType::BLINN] = base_unif;
+    light_unif.material_ambient = glGetUniformLocation(shaders_IDs[BLINN], "material.ambient");
+    light_unif.material_diffuse = glGetUniformLocation(shaders_IDs[BLINN], "material.diffuse");
+    light_unif.material_specular = glGetUniformLocation(shaders_IDs[BLINN], "material.specular");
+    light_unif.material_shininess = glGetUniformLocation(shaders_IDs[BLINN], "material.shininess");
+    light_unif.light_position_pointer = glGetUniformLocation(shaders_IDs[BLINN], "light.position");
+    light_unif.light_color_pointer = glGetUniformLocation(shaders_IDs[BLINN], "light.color");
+    light_unif.light_power_pointer = glGetUniformLocation(shaders_IDs[BLINN], "light.power");
+    light_uniforms[ShadingType::BLINN] = light_unif;
+    //Rendiamo attivo lo shader
+    glUseProgram(shaders_IDs[BLINN]);
+    //Shader uniforms initialization
+    glUniform3f(light_uniforms[BLINN].light_position_pointer, light.position.x, light.position.y, light.position.z);
+    glUniform3f(light_uniforms[BLINN].light_color_pointer, light.color.r, light.color.g, light.color.b);
+    glUniform1f(light_uniforms[BLINN].light_power_pointer, light.power);
 
-	//Texture_Phong Shader loading
+
+    //Texture_Phong Shader loading
 	// TODO
 
 	//Blinn Shader loading
@@ -541,6 +560,8 @@ void init() {
 	glUniform1d(glGetUniformLocation(shaders_IDs[TEXTURE_ONLY],"textureBuffer"),0);
 
 	//Pass-Through Shader loading
+	// this shades do what one expect from a fixex function pipeline
+	// multiply each vertex to rotation matrix, etc..
 	shaders_IDs[PASS_THROUGH] = initShader(ShaderDir + "v_passthrough.glsl", ShaderDir + "f_passthrough.glsl");
 	//Otteniamo i puntatori alle variabili uniform per poterle utilizzare in seguito
 	base_unif.P_Matrix_pointer = glGetUniformLocation(shaders_IDs[PASS_THROUGH], "P");
@@ -611,7 +632,14 @@ void display() {
 			glUniform1f(light_uniforms[GOURAUD].material_shininess, materials[objects[i].material].shininess);
 			break;
 		case ShadingType::PHONG:
-			//TODO
+            glUseProgram(shaders_IDs[PHONG]);
+                // Caricamento matrice trasformazione del modello
+                glUniformMatrix4fv(base_uniforms[PHONG].M_Matrix_pointer, 1, GL_FALSE, value_ptr(objects[i].M));
+                //Material loading
+                glUniform3fv(light_uniforms[PHONG].material_ambient, 1, glm::value_ptr(materials[objects[i].material].ambient));
+                glUniform3fv(light_uniforms[PHONG].material_diffuse, 1, glm::value_ptr(materials[objects[i].material].diffuse));
+                glUniform3fv(light_uniforms[PHONG].material_specular, 1, glm::value_ptr(materials[objects[i].material].specular));
+                glUniform1f(light_uniforms[PHONG].material_shininess, materials[objects[i].material].shininess);
 			break;
 		case ShadingType::BLINN:
 			glUseProgram(shaders_IDs[BLINN]);

@@ -190,7 +190,7 @@ GLCanvas::reshape (int w, int h)
 void
 GLCanvas::mouse (int button, int state, int x, int y)
 {
-  args->raytracing_animation = false;
+  //args->raytracing_animation = true;
   // Save the current state of the mouse.  This will be
   // used by the 'motion' function
   mouseButton = button;
@@ -238,8 +238,20 @@ GLCanvas::motion (int x, int y)
 	mouseY = y;
   }
 
-  // Redraw the scene with the new camera parameters
-  glutPostRedisplay ();
+    // animate raytracing of the scene
+    args->raytracing_animation = false;
+    display();
+    args->raytracing_animation = true;
+    raytracing_skip = max2 (args->width, args->height) / 10;
+    if (raytracing_skip % 2 == 0)
+        raytracing_skip++;
+    assert (raytracing_skip >= 1);
+    raytracing_x = raytracing_skip / 2;
+    raytracing_y = raytracing_skip / 2;
+    display ();					   // clear out any old rendering
+
+    // Redraw the scene with the new camera parameters
+    glutPostRedisplay ();
 }
 
 // ========================================================

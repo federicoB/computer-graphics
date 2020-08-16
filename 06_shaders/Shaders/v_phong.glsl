@@ -17,22 +17,22 @@ struct PointLight{
 	vec3 position;
 	vec3 color;
 	float power;
- };
+};
 uniform PointLight light;
 
 struct Material {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-    float shininess;
-}; 
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float shininess;
+};
 uniform Material material;
 
 void main()
 {
-    gl_Position = P * V * M * vec4(aPos, 1.0);
+	gl_Position = P * V * M * vec4(aPos, 1.0);
 
-    // Position in VCS
+	// Position in VCS
 	vec4 eyePosition = V * M * vec4(aPos, 1.0);
 	// LightPos in VCS
 	vec4 eyeLightPos = V * vec4(light.position, 1.0);
@@ -42,20 +42,20 @@ void main()
 	vec3 L = (eyeLightPos - eyePosition).xyz;
 	vec3 N = transpose(inverse(mat3(V * M))) * aNormal;
 
-    // ambient
-    vec3 ambient = light.power * material.ambient;
-  	
-    // diffuse 
-    vec3 norm = normalize(N);
-    vec3 lightDir = normalize(L);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.power * light.color * (diff * material.diffuse);
+	// ambient
+	vec3 ambient = light.power * material.ambient;
 
-    // specular
-    vec3 viewDir = normalize(E);
-    vec3 reflectDir = reflect(-lightDir, norm);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular =  light.power * light.color * (spec * material.specular);  
+	// diffuse
+	vec3 norm = normalize(N);
+	vec3 lightDir = normalize(L);
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = light.power * light.color * (diff * material.diffuse);
 
-    LightingColor = ambient + diffuse + specular; //phong
+	// specular
+	vec3 viewDir = normalize(E);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	vec3 specular =  light.power * light.color * (spec * material.specular);
+
+	LightingColor = ambient + diffuse + specular; //phong
 }

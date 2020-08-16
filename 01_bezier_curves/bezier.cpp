@@ -165,19 +165,6 @@ void addNewPoint(float x, float y) {
 
 }
 
-
-//TODO substitute with std library for array copy
-/*
- * Copies a point
- * @param var - destination point
- * @param value - original point
- */
-void pointCopy(std::array<float,3> &var, std::array<float, 3> value) {
-    var[0] = value[0];
-    var[1] = value[1];
-    var[2] = value[2];
-}
-
 /*
  * Linear interpolation
  * @param p1 - first point
@@ -196,7 +183,7 @@ void deCasteljau(float t) {
     int i;
 
     for (i = 0; i < controlPoints.size(); i++) {
-        pointCopy(temp[i], controlPoints[i]);
+        temp[i] = controlPoints[i];
     }
 
 
@@ -260,24 +247,24 @@ float point2LineDistance(std::array<float, 3> p0, std::array<float, 3> p1, std::
 
             //copy every control point in temp
             for (i = 0; i < numCP; i++) {
-                pointCopy(temp[i], controlPoints[i]);
-                pointCopy(curve1[i],controlPoints[i]);
-                pointCopy(curve2[i],controlPoints[i]);
+                temp[i] = controlPoints[i];
+                curve1[i] = controlPoints[i];
+                curve2[i] = controlPoints[i];
             }
 
             // curve 1 has first control point
-            pointCopy(curve1[0], temp[0]);
+            curve1[0] = temp[0];
 
             // curve 2 has last control point
-            pointCopy(curve2[numCP - 1], temp[numCP - 1]);
+            curve2[numCP - 1] = temp[numCP - 1];
 
             // Otherwise evaluate the point in 0.5 (subdivision)
             for (i = 1; i < numCP; i++) {
                 for (j = 0; j < numCP - i; j++) {
                     lerp(temp[j], temp[j + 1], 0.5f, temp[j]);
                 }
-                pointCopy(curve1[i], temp[0]);
-                pointCopy(curve2[numCP - i - 1], temp[numCP - i - 1]);
+                curve1[i] = temp[0];
+                curve2[numCP - i - 1] = temp[numCP - i - 1];
             }
 
             // Recursive call on the 2 sub curves
@@ -311,11 +298,8 @@ float point2LineDistance(std::array<float, 3> p0, std::array<float, 3> p1, std::
             // draw curve
             glColor3f(0.270, 0.968, 0.113);            // Green lines
             glBegin(GL_LINE_STRIP);
-            //TODO improve
             std::array<float,3> cPArray[controlPoints.size()];
-            for (i=0; i < controlPoints.size();i++) {
-                pointCopy(cPArray[i],controlPoints[i]);
-            }
+            std::copy(controlPoints.begin(),controlPoints.end(),cPArray);
             adaptiveSubdivision(cPArray,controlPoints.size(),0.00005f);
             // for (i = 0; i < 100; i = i + 2) {
             //    deCasteljau((float) i / 100);
