@@ -165,6 +165,8 @@ void addNewPoint(float x, float y) {
 
 }
 
+
+//TODO substitute with std library for array copy
 /*
  * Copies a point
  * @param var - destination point
@@ -198,8 +200,8 @@ void deCasteljau(float t) {
     }
 
 
-    for (i = 1; i < controlPoints.size(); i++) {
-        for (int j = 0; j < controlPoints.size() - i; j++) {
+    for (i = 1; i < controlPoints.size(); i++) { //lerp step
+        for (int j = 0; j < controlPoints.size() - i; j++) { //for each point of lerp step
             lerp(temp[j], temp[j + 1], t, temp[j]);
 
         }
@@ -233,49 +235,54 @@ float point2LineDistance(std::array<float, 3> p0, std::array<float, 3> p1, std::
  * @param cps - curve control points
  * @param tolerance - degree of smoothness
  */
-    void adaptiveSubdivision(std::vector<std::array<float, 3>> controlPoints, float tolerance) {
+    void adaptiveSubdivision(std::array<float, 3> controlPoints[], unsigned long numCP, float tolerance) {
         int i, j;
-        unsigned long numCV = controlPoints.size();
-        std::array<float,3> temp[numCV];
-        std::vector<std::array<float,3>> curve1;
-        std::vector<std::array<float,3>> curve2;
-        curve1.reserve(numCV);
-        curve2.reserve(numCV);
+        std::array<float,3> temp[numCP];
+        std::array<float,3> curve1[numCP];
+        std::array<float,3> curve2[numCP];
         bool canApproxLine = true;
+
+        // check if tolerance is reached and line can be approximated
 
         // Calculates the distance of every control point from the line between
         // the first control point and the last control point
-        for (i = 1; i < numCV - 1; i++) {
-            if (point2LineDistance(controlPoints[i], controlPoints[0], controlPoints[numCV - 1]) > tolerance) {
+        for (i = 1; i < numCP - 1; i++) {
+            if (point2LineDistance(controlPoints[i], controlPoints[0], controlPoints[numCP - 1]) > tolerance) {
                 canApproxLine = false;
             }
         }
 
         // Draw the line if it can be approximated
-        if (canApproxLine == true) {
+        if (canApproxLine) {
             glVertex3f(controlPoints[0][0], controlPoints[0][1], controlPoints[0][2]);
-            glVertex3f(controlPoints[numCV - 1][0], controlPoints[numCV - 1][1], controlPoints[numCV - 1][2]);
+            glVertex3f(controlPoints[numCP - 1][0], controlPoints[numCP - 1][1], controlPoints[numCP - 1][2]);
         } else {
 
-            for (i = 0; i < numCV; i++) {
+            //copy every control point in temp
+            for (i = 0; i < numCP; i++) {
                 pointCopy(temp[i], controlPoints[i]);
+                pointCopy(curve1[i],controlPoints[i]);
+                pointCopy(curve2[i],controlPoints[i]);
             }
 
+            // curve 1 has first control point
             pointCopy(curve1[0], temp[0]);
-            pointCopy(curve2[numCV - 1], temp[numCV - 1]);
 
-            // Otherwise evaluate the point in 0.5
-            for (i = 1; i < numCV; i++) {
-                for (j = 0; j < numCV - i; j++) {
+            // curve 2 has last control point
+            pointCopy(curve2[numCP - 1], temp[numCP - 1]);
+
+            // Otherwise evaluate the point in 0.5 (subdivision)
+            for (i = 1; i < numCP; i++) {
+                for (j = 0; j < numCP - i; j++) {
                     lerp(temp[j], temp[j + 1], 0.5f, temp[j]);
                 }
                 pointCopy(curve1[i], temp[0]);
-                pointCopy(curve2[numCV - i - 1], temp[numCV - i - 1]);
+                pointCopy(curve2[numCP - i - 1], temp[numCP - i - 1]);
             }
 
             // Recursive call on the 2 sub curves
-            adaptiveSubdivision(curve1, tolerance);
-            adaptiveSubdivision(curve2, tolerance);
+            adaptiveSubdivision(curve1, numCP, tolerance);
+            adaptiveSubdivision(curve2, numCP, tolerance);
         }
 
     }
@@ -304,10 +311,15 @@ float point2LineDistance(std::array<float, 3> p0, std::array<float, 3> p1, std::
             // draw curve
             glColor3f(0.270, 0.968, 0.113);            // Green lines
             glBegin(GL_LINE_STRIP);
-            // adaptiveSubdivision(controlPoints,0.00005f);
-             for (i = 0; i < 100; i = i + 2) {
-                deCasteljau((float) i / 100);
-             }
+            //TODO improve
+            std::array<float,3> cPArray[controlPoints.size()];
+            for (i=0; i < controlPoints.size();i++) {
+                pointCopy(cPArray[i],controlPoints[i]);
+            }
+            adaptiveSubdivision(cPArray,controlPoints.size(),0.00005f);
+            // for (i = 0; i < 100; i = i + 2) {
+            //    deCasteljau((float) i / 100);
+            // }
             glEnd();
         }
 
