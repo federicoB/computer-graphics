@@ -17,8 +17,8 @@
 #include <array>
 #include <math.h>
 
-std::vector<std::array<float, 3>> PointArray;
-int NumPts = 0;
+// control point array
+std::vector<std::array<float, 3>> controlPoints;
 
 // Window size in pixels
 int WindowHeight;
@@ -33,7 +33,7 @@ void removeFirstPoint();
 void removeLastPoint();
 
 
-void myKeyboardFunc(unsigned char key, int x, int y) {
+void keyboard_handler(unsigned char key, int x, int y) {
     switch (key) {
         case 'f':
             removeFirstPoint();
@@ -45,90 +45,93 @@ void myKeyboardFunc(unsigned char key, int x, int y) {
             break;
         case 27:            // Escape key
             exit(0);
-            break;
     }
 }
 
 void removeFirstPoint() {
-    int i;
-    if (NumPts > 0) {
-        // Remove the first point, slide the rest down
-        NumPts--;
-        for (i = 0; i < NumPts; i++) {
-            PointArray[i][0] = PointArray[i + 1][0];
-            PointArray[i][1] = PointArray[i + 1][1];
-            PointArray[i][2] = 0;
-        }
+    if (not controlPoints.empty()) {
+        // Remove the first point, slide the rest
+        controlPoints.erase(controlPoints.begin());
     }
 }
 
 /*
  * Get the nearest point in click range
+ * @param x,y coordinate of search center point
  * @return index of the nearest point in range
  */
 int getPointInRange(float x, float y) {
-    int near;
-    double lowerDistance;
-    double r;
+
+    // index for nearest point
+    int near = -1;
+
+    double max_distance = 0.05;
+
+    double lowestDistance;
+
     double distance;
 
-    near = -1;
-    r = 0.005;
-    if (NumPts > 0) {
-        //check if the first point is near click
-        lowerDistance = sqrt(pow(x - PointArray[0][0], 2) + pow(y - PointArray[0][1], 2));
-        if (lowerDistance <= r) near = 0;
-
-        //check other points
-        for (int i = 1; i < NumPts; i++) {
-            distance = sqrt(pow(x - PointArray[i][0], 2.0) + pow(y - PointArray[i][1], 2.0));
-            if (distance <= r && distance <= lowerDistance) {
+    if (!controlPoints.empty()) {
+        //initialize lowest distance using first point
+        lowestDistance = sqrt(pow(x - controlPoints[0][0], 2) + pow(y - controlPoints[0][1], 2));
+        if (lowestDistance <= max_distance) near = 0;
+        //check remaining points
+        for (int i = 1; i < controlPoints.size(); i++) {
+            std::array<float, 3> controlPoint = controlPoints[i];
+            // euclidean distance
+            distance = sqrt(pow(x - controlPoint[0], 2.0) + pow(y - controlPoint[1], 2.0));
+            // if the distance is accettable and lower than current lowest distance
+            if (distance <= max_distance && distance <= lowestDistance) {
                 near = i;
-                lowerDistance = distance;
+                lowestDistance = distance;
             }
         }
     }
-
-
     return near;
 }
+
+// macro to change reference frame from mouse to window one
+#define mouse_to_windows(x, y) \
+ yPos = ((float) y) / ((float) (WindowHeight - 1)); \
+ xPos = ((float) x) / ((float) (WindowWidth - 1)); \
+ yPos = 1.0f - yPos; //invert y coordinate
 
 /*
  * Moves a control point
  * @param i - index of the control point
  * @param x - x mouse's coordinate
- * @param y - y moouse's coordinate
+ * @param y - y mouse's coordinate
  */
 void movePoint(int i, int x, int y) {
     float xPos;
     float yPos;
 
-    yPos = ((float) y) / ((float) (WindowHeight - 1));
-    xPos = ((float) x) / ((float) (WindowWidth - 1));
-    yPos = 1.0f - yPos;               // Flip value since y position is from top row.
-
-    PointArray[i][0] = xPos;
-    PointArray[i][1] = yPos;
+    mouse_to_windows(x, y);
+    //set new position
+    controlPoints[i][0] = xPos;
+    controlPoints[i][1] = yPos;
     glutPostRedisplay();
 }
 
-// Left button presses place a control point.
-void myMouseFunc(int button, int state, int x, int y) {
+
+void mouseHandler(int button, int state, int x, int y) {
+    // Left button presses place a control point.
+
     float xPos;
     float yPos;
 
-    yPos = ((float) y) / ((float) (WindowHeight - 1));
-    xPos = ((float) x) / ((float) (WindowWidth - 1));
-    yPos = 1.0f - yPos;               // Flip value since y position is from top row.
+    mouse_to_windows(x, y);
 
-    // [NEW] check if point in range
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        //while left mouse button is down get nearest clicked point
         clickedPoint = getPointInRange(xPos, yPos);
     } else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         if (clickedPoint >= 0) {
             movePoint(clickedPoint, x, y);
             clickedPoint = -1;
         } else {
+            // if outside range of control point
+            // create a new point
             addNewPoint(xPos, yPos);
             glutPostRedisplay();
         }
@@ -149,8 +152,8 @@ void mousemove(int x, int y) {
 // Add a new point to the end of the list.
 // Remove the first point in the list if too many points.
 void removeLastPoint() {
-    if (NumPts > 0) {
-        NumPts--;
+    if (!controlPoints.empty()) {
+        controlPoints.pop_back();
     }
 }
 
@@ -158,8 +161,7 @@ void removeLastPoint() {
 // Remove the first point in the list if too many points.
 void addNewPoint(float x, float y) {
     std::array<float, 3> newPoint = {x, y, 0};
-    PointArray.push_back(newPoint);
-    NumPts++;
+    controlPoints.push_back(newPoint);
 
 }
 
@@ -168,7 +170,7 @@ void addNewPoint(float x, float y) {
  * @param var - destination point
  * @param value - original point
  */
-void pointCopy(float var[], std::array<float, 3> value) {
+void pointCopy(std::array<float,3> &var, std::array<float, 3> value) {
     var[0] = value[0];
     var[1] = value[1];
     var[2] = value[2];
@@ -181,22 +183,23 @@ void pointCopy(float var[], std::array<float, 3> value) {
  * @param t - evaluates the curve in t (range 0-1)
  * @param ret - returned point
  */
-void lerp(float *p1, float *p2, float t, float *ret) {
+void lerp(std::array<float,3> p1, std::array<float,3> p2, float t, std::array<float,3> &ret) {
     ret[0] = ((1 - t) * p1[0]) + (t * p2[0]);
     ret[1] = ((1 - t) * p1[1]) + (t * p2[1]);
     ret[2] = ((1 - t) * p1[2]) + (t * p2[2]);
 }
 
 void deCasteljau(float t) {
-    float temp[NumPts][3];
+    std::array<float,3> temp[controlPoints.size()];
     int i;
 
-    for (i = 0; i < NumPts; i++) {
-        pointCopy(temp[i], PointArray[i]);
+    for (i = 0; i < controlPoints.size(); i++) {
+        pointCopy(temp[i], controlPoints[i]);
     }
 
-    for (i = 1; i < NumPts; i++) {
-        for (int j = 0; j < NumPts - i; j++) {
+
+    for (i = 1; i < controlPoints.size(); i++) {
+        for (int j = 0; j < controlPoints.size() - i; j++) {
             lerp(temp[j], temp[j + 1], t, temp[j]);
 
         }
@@ -204,91 +207,173 @@ void deCasteljau(float t) {
     }
     glVertex3f(temp[0][0], temp[0][1], temp[0][2]);
 }
-
-void display(void) {
-    int i;
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    glLineWidth(2);
-
-    // Draw the line segments
-
-    if (NumPts > 1) {
-        glColor3f(0.968, 0.113, 0.113);            // Reddish/purple lines
-        glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, NumPts, &PointArray[0][0]);
-        glBegin(GL_LINE_STRIP);
-        for (i = 0; i < NumPts; i++) {
-            glVertex2f(PointArray[i][0], PointArray[i][1]);
-        }
-        glEnd();
-        glColor3f(0.270, 0.968, 0.113);            // Green lines
-        glBegin(GL_LINE_STRIP);
-        for (i = 0; i < 100; i = i + 2) {
-            deCasteljau((float) i / 100);
-        }
-        glEnd();
+    /*
+ * Calculate the distance between points
+ * @param p1 - point 1
+ * @param p2 - point 2
+ */
+float point2pointDistance(std::array<float, 3> p1, std::array<float, 3> p2) {
+        return sqrtf(powf(p1[0] - p2[0], 2) + powf(p1[1] - p2[1], 2));
     }
 
-    // Draw the interpolated points second.
-    glColor3f(0.0f, 0.0f, 0.0f);            // Draw points in black
-    glBegin(GL_POINTS);
+/*
+ * Evaulate the distance of a point from a line
+ * @param p0 - point
+ * @param p1, p2 - extremity of segment
+ */
+float point2LineDistance(std::array<float, 3> p0, std::array<float, 3> p1, std::array<float, 3> p2) {
+    return fabsf(
+            ((p2[0] - p1[0]) * (p1[1] - p0[1])) // (x2 - x1) * (y1 - y0)
+            - ((p1[0] - p0[0]) * (p2[1] - p1[1])) // - (x1 - x0) * (p2 - p1)
+    ) / point2pointDistance(p1, p2);
+}
 
-    for (i = 0; i < NumPts; i++) {
-        glVertex2f(PointArray[i][0], PointArray[i][1]);
+/*
+ * Adaptive subdivision algorithm
+ * @param cps - curve control points
+ * @param tolerance - degree of smoothness
+ */
+    void adaptiveSubdivision(std::vector<std::array<float, 3>> controlPoints, float tolerance) {
+        int i, j;
+        unsigned long numCV = controlPoints.size();
+        std::array<float,3> temp[numCV];
+        std::vector<std::array<float,3>> curve1;
+        std::vector<std::array<float,3>> curve2;
+        curve1.reserve(numCV);
+        curve2.reserve(numCV);
+        bool canApproxLine = true;
+
+        // Calculates the distance of every control point from the line between
+        // the first control point and the last control point
+        for (i = 1; i < numCV - 1; i++) {
+            if (point2LineDistance(controlPoints[i], controlPoints[0], controlPoints[numCV - 1]) > tolerance) {
+                canApproxLine = false;
+            }
+        }
+
+        // Draw the line if it can be approximated
+        if (canApproxLine == true) {
+            glVertex3f(controlPoints[0][0], controlPoints[0][1], controlPoints[0][2]);
+            glVertex3f(controlPoints[numCV - 1][0], controlPoints[numCV - 1][1], controlPoints[numCV - 1][2]);
+        } else {
+
+            for (i = 0; i < numCV; i++) {
+                pointCopy(temp[i], controlPoints[i]);
+            }
+
+            pointCopy(curve1[0], temp[0]);
+            pointCopy(curve2[numCV - 1], temp[numCV - 1]);
+
+            // Otherwise evaluate the point in 0.5
+            for (i = 1; i < numCV; i++) {
+                for (j = 0; j < numCV - i; j++) {
+                    lerp(temp[j], temp[j + 1], 0.5f, temp[j]);
+                }
+                pointCopy(curve1[i], temp[0]);
+                pointCopy(curve2[numCV - i - 1], temp[numCV - i - 1]);
+            }
+
+            // Recursive call on the 2 sub curves
+            adaptiveSubdivision(curve1, tolerance);
+            adaptiveSubdivision(curve2, tolerance);
+        }
+
     }
-    glEnd();
 
-    glFlush();
-}
+    void display(void) {
+        int i;
 
-void initRendering() {
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glLineWidth(2);
 
-    // Make big points and wide lines.  (This may be commented out if desired.)
-    glPointSize(8);
+        // Draw the straight line segments between control points
+        if (controlPoints.size() > 1) {
+            glColor3f(0.968, 0.113, 0.113);            // Reddish/purple lines
+            // define evaluator
+            glMap1f(GL_MAP1_VERTEX_3, // type of data generated
+                    0.0, 1.0, // evaluate between this 2 points
+                    3, // stride
+                    controlPoints.size(),  // curve order
+                    &controlPoints[0][0]); //pointer to array of control points
+            glBegin(GL_LINE_STRIP);
+            for (i = 0; i < controlPoints.size(); i++) {
+                glVertex2f(controlPoints[i][0], controlPoints[i][1]);
+            }
+            glEnd();
+
+            // draw curve
+            glColor3f(0.270, 0.968, 0.113);            // Green lines
+            glBegin(GL_LINE_STRIP);
+            // adaptiveSubdivision(controlPoints,0.00005f);
+             for (i = 0; i < 100; i = i + 2) {
+                deCasteljau((float) i / 100);
+             }
+            glEnd();
+        }
+
+        // Draw the interpolated points second.
+        glColor3f(0.0f, 0.0f, 0.0f);            // Draw points in black
+        glBegin(GL_POINTS);
+        //TODO scale points
+        for (i = 0; i < controlPoints.size(); i++) {
+            glVertex2f(controlPoints[i][0], controlPoints[i][1]);
+        }
+        glEnd();
+
+        glFlush();
+    }
+
+    void initRendering() {
+        //white background color
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        // set point size
+        glPointSize(15);
 
 
-    // The following commands should induce OpenGL to create round points and
-    //	antialias points and lines.  (This is implementation dependent unfortunately, and
-    //  may slow down rendering considerably.)
-    //  You may comment these out if you wish.
-    glEnable(GL_POINT_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
-    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);    // Make round points, not square points
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);        // Antialias the lines
-    glEnable(GL_MAP1_VERTEX_3);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
+        // The following commands should induce OpenGL to create round points and
+        //	antialias points and lines.  (This is implementation dependent unfortunately, and
+        //  may slow down rendering considerably.)
+        //  You may comment these out if you wish.
+        glEnable(GL_POINT_SMOOTH); //enable point antialiasing
+        glEnable(GL_LINE_SMOOTH); //enable line antialisiasing
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);    // Make round points, not square points
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);        // Antialias the lines
+        glEnable(GL_MAP1_VERTEX_3); //enable opengl bezier evaluator
+        glEnable(GL_BLEND); //enable object blending
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //set blending formula
+    }
 
-void resizeWindow(int w, int h) {
-    WindowHeight = (h > 1) ? h : 2;
-    WindowWidth = (w > 1) ? w : 2;
-    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0.0f, 1.0f, 0.0f, 1.0f);  // Always view [0,1]x[0,1].
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
+    void resizeWindow(int new_width, int new_heigth) {
+        WindowHeight = (new_heigth > 1) ? new_heigth : 2;
+        WindowWidth = (new_width > 1) ? new_width : 2;
+        // change viewport
+        glViewport(0, 0, (GLsizei) new_width, (GLsizei) new_heigth);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluOrtho2D(0.0f, 1.0f, 0.0f, 1.0f);  // Always view [0,1]x[0,1].
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
 
-int main(int argc, char **argv) {
+    int main(int argc, char **argv) {
 
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(500, 500);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Assignment 1 - bezier curves");
+        glutInit(&argc, argv);
+        // double buffering buffer and rgb color support
+        glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+        glutInitWindowSize(500, 500);
+        glutInitWindowPosition(100, 100);
+        glutCreateWindow("Assignment 1 - bezier curves");
 
-    initRendering();
+        initRendering();
 
-    glutDisplayFunc(display);
-    glutReshapeFunc(resizeWindow);
-    glutKeyboardFunc(myKeyboardFunc);
-    glutMouseFunc(myMouseFunc);
-    glutMotionFunc(mousemove); // detects mouse move while dragging
-    //glutPassiveMotionFunc(passiveMouse)
-    glutMainLoop();
+        glutDisplayFunc(display);
+        glutReshapeFunc(resizeWindow);
+        glutKeyboardFunc(keyboard_handler);
+        glutMouseFunc(mouseHandler);
+        glutMotionFunc(mousemove); // detects mouse move while dragging
+        //glutPassiveMotionFunc(passiveMouse)
+        glutMainLoop();
 
-    return 0;                    // This line is never reached
-}
+        return 0;                    // This line is never reached
+    }
