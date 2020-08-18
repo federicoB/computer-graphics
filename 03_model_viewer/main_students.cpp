@@ -623,9 +623,11 @@ void special(int key, int x, int y) {
 // gestione delle voci principali del menu
 void main_menu_func(int option) {
     switch (option) {
-        case MenuOption::FLAT_SHADING: //TODO
+        case MenuOption::FLAT_SHADING:
+            glShadeModel(GL_FLAT);
             break;
-        case MenuOption::SMOOTH_SHADING: //TODO
+        case MenuOption::SMOOTH_SHADING:
+            glShadeModel(GL_SMOOTH);
             break;
         case MenuOption::WIRE_FRAME:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -633,9 +635,11 @@ void main_menu_func(int option) {
         case MenuOption::FACE_FILL:
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             break;
-        case MenuOption::CULLING_ON: //TODO
+        case MenuOption::CULLING_ON:
+            glEnable(GL_CULL_FACE);
             break;
-        case MenuOption::CULLING_OFF: //TODO
+        case MenuOption::CULLING_OFF:
+            glDisable(GL_CULL_FACE);
             break;
         case MenuOption::CHANGE_TO_OCS:
             TransformMode = OCS;
@@ -650,7 +654,22 @@ void main_menu_func(int option) {
 
 // gestione delle voci principali del sub menu per i matriali
 void material_menu_function(int option) {
-    //TODO material_menu_function
+    switch (option) {
+        case MaterialType::RED_PLASTIC:
+            objects[selected_object].material = MaterialType::RED_PLASTIC;
+            break;
+        case MaterialType::EMERALD:
+            objects[selected_object].material = MaterialType::EMERALD;
+            break;
+        case MaterialType::BRASS:
+            objects[selected_object].material = MaterialType::BRASS;
+            break;
+        case MaterialType::SLATE:
+            objects[selected_object].material = MaterialType::SLATE;
+            break;
+        default:
+            break;
+    }
 }
 
 // costruisce i menu openGL
