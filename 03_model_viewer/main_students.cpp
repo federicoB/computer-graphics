@@ -43,7 +43,7 @@ GLfloat aspect_ratio = 16.0f / 9.0f;
 
 static glm::vec4 lightpos = {5.0f, 5.0f, 5.0f, 1.0f};
 
-static Object object;
+static vector<Object> objects;
 static vector<Material> materials;
 
 /*camera structures*/
@@ -68,6 +68,8 @@ enum {
 static bool moving_trackball = 0;
 static int last_mouse_pos_Y;
 static int last_mouse_pos_X;
+
+static unsigned long selected_object = 0;
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {
@@ -195,7 +197,7 @@ void init() {
         obj1.name = "Sfera";
         glLoadIdentity();
         glGetFloatv(GL_MODELVIEW_MATRIX, obj1.model_matrix);
-        object = obj1;
+        objects.push_back(obj1);
     }
 }
 
@@ -290,9 +292,9 @@ void resize(int w, int h) {
 void printToScreen() {
     string axis = "Asse: ";
     string mode = "Naviga/Modifica: ";
-    string obj = "Oggetto: " + object.name;
+    string obj = "Oggetto: " + objects[selected_object].name;
     string ref = "Sistema WCS/OCS: ";
-    string mat = "Materiale: " + materials[object.material].name;
+    string mat = "Materiale: " + materials[objects[selected_object].material].name;
     switch (WorkingAxis) {
         case X:
             axis += "X";
@@ -369,6 +371,8 @@ void display() {
     drawAxis(3.0, 1); // The central Axis point of reference
     drawGrid(10.0, 100); // The horizontal grid
     glEnable(GL_LIGHTING);
+
+    Object object = objects[selected_object];
 
     glPushMatrix();
     glMultMatrixf(object.model_matrix);
@@ -450,7 +454,7 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
 
             break;
     }
-    glGetFloatv(GL_MODELVIEW_MATRIX, object.model_matrix);
+    glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
     glPopMatrix();
 }
 
@@ -605,10 +609,10 @@ void keyboardDown(unsigned char key, int x, int y) {
 void special(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
-            //TODO GLUT_KEY_LEFT
+            selected_object = selected_object == 0 ? objects.size() - 1 : selected_object - 1;
             break;
         case GLUT_KEY_RIGHT:
-            //TODO GLUT_KEY_RIGHT
+            selected_object = (selected_object + 1) % objects.size();
             break;
         default:
             break;
