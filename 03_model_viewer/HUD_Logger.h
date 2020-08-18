@@ -2,6 +2,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include "model_viewer.h"
 
 /*
 Questa classe statica contiene un singleton utilizzato come ipotetico logger a schermo.

@@ -1,7 +1,6 @@
 #include "HUD_Logger.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "model_viewer.h"
 
 using namespace std;
 
