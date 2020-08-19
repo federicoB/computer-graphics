@@ -69,7 +69,7 @@ static bool moving_trackball = 0;
 static int last_mouse_pos_Y;
 static int last_mouse_pos_X;
 
-static unsigned long selected_object = 0;
+static unsigned int selected_object = 0;
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {
@@ -124,6 +124,36 @@ void generate_and_load_buffers(Mesh *mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferObjID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indices.size() * sizeof(GLshort), mesh->indices.data(), GL_STATIC_DRAW);
 }
+
+/*
+	Crea ed applica la matrice di trasformazione alla matrice dell'oggeto discriminando tra WCS e OCS.
+	La funzione � gia invocata con un input corretto, � sufficiente concludere la sua implementazione.
+*/
+void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, GLfloat angle, GLfloat scale_factor) {
+    glPushMatrix();
+    glLoadIdentity();
+    // Usare glMultMatrix per moltiplicare la matrice attiva in openGL con una propria matrice.
+    // In alternativa si pu� anche usare glm per creare e manipolare le matrici.
+
+    switch (TransformMode) {
+        case WCS:
+            //TODO do something different for WCS ad OCS
+            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
+            glScalef(scale_factor, scale_factor, scale_factor);
+            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
+            glMultMatrixf(objects[selected_object].model_matrix);
+            break;
+        case OCS:
+            glMultMatrixf(objects[selected_object].model_matrix);
+            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
+            glScalef(scale_factor, scale_factor, scale_factor);
+            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
+            break;
+    }
+    glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
+    glPopMatrix();
+}
+
 
 void init() {
 // Default render settings
@@ -184,20 +214,28 @@ void init() {
     PerspectiveSetup.near_plane = 1.0f;
 
     string objectNames[] = {"sphere","cow","horse"};
+    vector<glm::vec4> startingpositions = {
+            {0,0,0,0},
+            {0,0,-5,-5},
+            {0,0,10,10}
+    };
 
-    for (const string &objectName : objectNames) {
+    for (unsigned int i=0; i< size(objectNames); i++) {
+        string objectName = objectNames[i];
         // Mesh Loading
         Mesh mesh = {};
         loadObjFile(MeshDir + objectName + ".obj", &mesh);
         generate_and_load_buffers(&mesh);
         // Object Setup
-        Object obj1 = {};
-        obj1.mesh = mesh;
-        obj1.material = MaterialType::RED_PLASTIC;
-        obj1.name = objectName;
+        Object obj = {};
+        obj.mesh = mesh;
+        obj.material = MaterialType::RED_PLASTIC;
+        obj.name = objectName;
         glLoadIdentity();
-        glGetFloatv(GL_MODELVIEW_MATRIX, obj1.model_matrix);
-        objects.push_back(obj1);
+        selected_object = i;
+        glGetFloatv(GL_MODELVIEW_MATRIX, obj.model_matrix);
+        objects.push_back(obj);
+        modifyModelMatrix(startingpositions[i],glm::vec4(1),0.f,1.0f);
     }
 }
 
@@ -432,35 +470,6 @@ void moveCameraUp() {
 
 void moveCameraDown() {
     //TODO moveCameraDown
-}
-
-/*
-	Crea ed applica la matrice di trasformazione alla matrice dell'oggeto discriminando tra WCS e OCS.
-	La funzione � gia invocata con un input corretto, � sufficiente concludere la sua implementazione.
-*/
-void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, GLfloat angle, GLfloat scale_factor) {
-    glPushMatrix();
-    glLoadIdentity();
-    // Usare glMultMatrix per moltiplicare la matrice attiva in openGL con una propria matrice.
-    // In alternativa si pu� anche usare glm per creare e manipolare le matrici.
-
-    switch (TransformMode) {
-        case WCS:
-            //TODO do something different for WCS ad OCS
-            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
-            glScalef(scale_factor, scale_factor, scale_factor);
-            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
-            glMultMatrixf(objects[selected_object].model_matrix);
-            break;
-        case OCS:
-            glMultMatrixf(objects[selected_object].model_matrix);
-            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
-            glScalef(scale_factor, scale_factor, scale_factor);
-            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
-            break;
-    }
-    glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
-    glPopMatrix();
 }
 
 void mouseClick(int button, int state, int x, int y) {
