@@ -194,7 +194,7 @@ void init() {
         Object obj1 = {};
         obj1.mesh = mesh;
         obj1.material = MaterialType::RED_PLASTIC;
-        obj1.name = "Sfera";
+        obj1.name = objectName;
         glLoadIdentity();
         glGetFloatv(GL_MODELVIEW_MATRIX, obj1.model_matrix);
         objects.push_back(obj1);
@@ -372,25 +372,25 @@ void display() {
     drawGrid(10.0, 100); // The horizontal grid
     glEnable(GL_LIGHTING);
 
-    Object object = objects[selected_object];
+    for (Object object : objects) {
+        glPushMatrix();
+        glMultMatrixf(object.model_matrix);
+        glDisable(GL_LIGHTING);
+        drawAxis(1.0, 0);
+        glEnable(GL_LIGHTING);
 
-    glPushMatrix();
-    glMultMatrixf(object.model_matrix);
-    glDisable(GL_LIGHTING);
-    drawAxis(1.0, 0);
-    glEnable(GL_LIGHTING);
+        //Material Setup
+        Material mat = materials[object.material];
+        glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(mat.ambient));
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, glm::value_ptr(mat.diffuse));
+        glMaterialfv(GL_FRONT, GL_SPECULAR, glm::value_ptr(mat.specular));
+        glMaterialf(GL_FRONT, GL_SHININESS, mat.shiness);
 
-    //Material Setup
-    Material mat = materials[object.material];
-    glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(mat.ambient));
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, glm::value_ptr(mat.diffuse));
-    glMaterialfv(GL_FRONT, GL_SPECULAR, glm::value_ptr(mat.specular));
-    glMaterialf(GL_FRONT, GL_SHININESS, mat.shiness);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glBindVertexArray(object.mesh.vertexArrayObjID);
-    glDrawElements(GL_TRIANGLES, object.mesh.indices.size(), GL_UNSIGNED_SHORT, (void *) 0);
-    glPopMatrix();
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glBindVertexArray(object.mesh.vertexArrayObjID);
+        glDrawElements(GL_TRIANGLES, object.mesh.indices.size(), GL_UNSIGNED_SHORT, (void *) 0);
+        glPopMatrix();
+    }
 
     printToScreen();
 
