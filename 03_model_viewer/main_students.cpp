@@ -446,12 +446,17 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
 
     switch (TransformMode) {
         case WCS:
-            //TODO WCS
-
+            //TODO do something different for WCS ad OCS
+            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
+            glScalef(scale_factor, scale_factor, scale_factor);
+            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
+            glMultMatrixf(objects[selected_object].model_matrix);
             break;
         case OCS:
-            //TODO OCS
-
+            glMultMatrixf(objects[selected_object].model_matrix);
+            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
+            glScalef(scale_factor, scale_factor, scale_factor);
+            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
             break;
     }
     glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
