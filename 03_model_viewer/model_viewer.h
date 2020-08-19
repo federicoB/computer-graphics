@@ -4,9 +4,22 @@
 
 #pragma once
 
+
+#include <GL/glew.h>
+#include <GL/freeglut.h>
 #include <string>
 #include <glm/vec3.hpp>
-#include <GL/glew.h>
+#include <stdio.h>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+
+#include <GL/freeglut.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
 
@@ -37,6 +50,11 @@ enum {
     ROTATING,
     SCALING
 } OperationMode;
+
+enum {
+    OCS, // Object Coordinate System
+    WCS // World Coordinate System
+} TransformMode;
 
 enum {
     X,
@@ -87,3 +105,18 @@ typedef enum {
     CHANGE_TO_OCS
 } MenuOption;
 
+struct ViewSetup{
+    glm::vec4 position;
+    glm::vec4 target;
+    glm::vec4 upVector;
+};
+struct PerspectiveSetup{
+    float fovY, aspect, near_plane, far_plane;
+};
+
+extern ViewSetup viewSetup;
+extern PerspectiveSetup perspectiveSetup;
+
+extern vector<Object> objects;
+extern vector<Material> materials;
+extern  unsigned int selected_object;

@@ -16,18 +16,7 @@ based on the OpenGL Shading Language (GLSL) specifications.
 
 #define _CRT_SECURE_NO_WARNINGS // for fscanf
 
-#include <stdio.h>
-#include <math.h>
-#include <vector>
-#include <string>
-#include <unordered_map>
-
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "HUD_Logger.h"
+#include "window.h"
 
 //keyboard macros
 #define SHIFT_WHEEL_UP 11
@@ -37,39 +26,23 @@ based on the OpenGL Shading Language (GLSL) specifications.
 
 using namespace std;
 
-static int WindowWidth = 1366;
-static int WindowHeight = 768;
-GLfloat aspect_ratio = 16.0f / 9.0f;
-
 static glm::vec4 lightpos = {5.0f, 5.0f, 5.0f, 1.0f};
-
-static vector<Object> objects;
-static vector<Material> materials;
 
 /*camera structures*/
 constexpr float CAMERA_ZOOM_SPEED = 0.1f;
 constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
 
-struct {
-    glm::vec4 position;
-    glm::vec4 target;
-    glm::vec4 upVector;
-} ViewSetup;
+struct ViewSetup viewSetup;
 
-struct {
-    float fovY, aspect, near_plane, far_plane;
-} PerspectiveSetup;
-
-enum {
-    OCS, // Object Coordinate System
-    WCS // World Coordinate System
-} TransformMode;
+struct PerspectiveSetup perspectiveSetup;
 
 static bool moving_trackball = 0;
 static int last_mouse_pos_Y;
 static int last_mouse_pos_X;
 
-static unsigned int selected_object = 0;
+vector<Object> objects;
+vector<Material> materials;
+unsigned int selected_object = 0;
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {
@@ -203,15 +176,15 @@ void init() {
     materials[MaterialType::SLATE].shiness = slate_shiness;
 
     // Camera Setup
-    ViewSetup = {};
-    ViewSetup.position = glm::vec4(10.0, 10.0, 10.0, 1.0);
-    ViewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
-    ViewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
-    PerspectiveSetup = {};
-    PerspectiveSetup.aspect = (GLfloat) WindowWidth / (GLfloat) WindowHeight;
-    PerspectiveSetup.fovY = 45.0f;
-    PerspectiveSetup.far_plane = 2000.0f;
-    PerspectiveSetup.near_plane = 1.0f;
+    viewSetup = {};
+    viewSetup.position = glm::vec4(10.0, 10.0, 10.0, 1.0);
+    viewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
+    viewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
+    perspectiveSetup = {};
+    perspectiveSetup.aspect = (GLfloat) WindowWidth / (GLfloat) WindowHeight;
+    perspectiveSetup.fovY = 45.0f;
+    perspectiveSetup.far_plane = 2000.0f;
+    perspectiveSetup.near_plane = 1.0f;
 
     string objectNames[] = {"sphere","cow","horse"};
     vector<glm::vec4> startingpositions = {
@@ -303,92 +276,7 @@ void drawGrid(float scale, int dimension) {
     glPopMatrix();
 }
 
-void resize(int w, int h) {
-    if (h == 0)    // Window is minimized
-        return;
-    int width = h * aspect_ratio;           // width is adjusted for aspect ratio
-    int left = (w - width) / 2;
-    // Set Viewport to window dimensions
-    glViewport(left, 0, width, h);
-    WindowWidth = w;
-    WindowHeight = h;
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(PerspectiveSetup.fovY, PerspectiveSetup.aspect, PerspectiveSetup.near_plane,
-                   PerspectiveSetup.far_plane);
-
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(ViewSetup.position.x, ViewSetup.position.y, ViewSetup.position.z,
-              ViewSetup.target.x, ViewSetup.target.y, ViewSetup.target.z,
-              ViewSetup.upVector.x, ViewSetup.upVector.y, ViewSetup.upVector.z);
-}
-
-/*Logging to screen*/
-void printToScreen() {
-    string axis = "Asse: ";
-    string mode = "Naviga/Modifica: ";
-    string obj = "Oggetto: " + objects[selected_object].name;
-    string ref = "Sistema WCS/OCS: ";
-    string mat = "Materiale: " + materials[objects[selected_object].material].name;
-    switch (WorkingAxis) {
-        case X:
-            axis += "X";
-            break;
-        case Y:
-            axis += "Y";
-            break;
-        case Z:
-            axis += "Z";
-            break;
-    }
-    switch (OperationMode) {
-        case TRASLATING:
-            mode += "Traslazione";
-            break;
-        case ROTATING:
-            mode += "Rotazione";
-            break;
-        case SCALING:
-            mode += "Scalatura";
-            break;
-        case NAVIGATION:
-            mode += "Naviga";
-            break;
-    }
-    switch (TransformMode) {
-        case OCS:
-            ref += "OCS";
-            break;
-        case WCS:
-            ref += "WCS";
-            break;
-    }
-    vector<string> lines;
-    lines.push_back(mat);
-    lines.push_back(obj);
-    lines.push_back(axis);
-    lines.push_back(mode);
-    lines.push_back(ref);
-
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    gluOrtho2D(0, WindowHeight * aspect_ratio, 0, WindowHeight);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    HUD_Logger::get()->printInfo(lines);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-
-    resize(WindowWidth, WindowHeight);
-}
 
 void display() {
     // grey background color
@@ -576,11 +464,11 @@ void mouseActiveMotion(int x, int y) {
         // rotation axis = (dest vec orig) / (len(dest vec orig))
         glm::vec3 rotation_vec = glm::cross(origin, destination);
         // calcolo del vettore direzione w = C - A
-        glm::vec4 direction = ViewSetup.position - ViewSetup.target;
+        glm::vec4 direction = viewSetup.position - viewSetup.target;
         // rotazione del vettore direzione w
         // determinazione della nuova posizione della camera
-        ViewSetup.position =
-                ViewSetup.target + glm::rotate(glm::mat4(1.0f), glm::radians(-angle), rotation_vec) * direction;
+        viewSetup.position =
+                viewSetup.target + glm::rotate(glm::mat4(1.0f), glm::radians(-angle), rotation_vec) * direction;
     }
     last_mouse_pos_X = x;
     last_mouse_pos_Y = y;
@@ -715,12 +603,7 @@ void buildOpenGLMenu() {
 
 int main(int argc, char **argv) {
 
-    // initialize openGL Utility Toolkit
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-    glutInitWindowSize(WindowWidth, WindowHeight);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Model Viewer ");
+    init_window(argc,argv);
 
     glutDisplayFunc(display);
     glutReshapeFunc(resize);

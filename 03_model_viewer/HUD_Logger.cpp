@@ -1,10 +1,7 @@
+
 #include "HUD_Logger.h"
-#include <GL/glew.h>
-#include <GL/freeglut.h>
 
 using namespace std;
-
-extern float WindowWidth, WindowHeight;
 
 HUD_Logger* HUD_Logger::logger;
 bool HUD_Logger::ready;

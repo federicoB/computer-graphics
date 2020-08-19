@@ -16,7 +16,9 @@ add_executable(01_bezier_curves 01_bezier_curves/bezier.cpp)
 target_link_libraries(01_bezier_curves ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY})
 
 
-add_executable(03_model_viewer 03_model_viewer/main_students.cpp 03_model_viewer/HUD_Logger.cpp)
+add_executable(03_model_viewer 03_model_viewer/main_students.cpp
+        03_model_viewer/window.cpp
+        03_model_viewer/HUD_Logger.cpp)
 target_link_libraries(03_model_viewer ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)
 
 
