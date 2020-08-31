@@ -133,7 +133,6 @@ void init() {
     OperationMode = NAVIGATION;
 
     glEnable(GL_DEPTH_TEST);    // Hidden surface removal
-    glCullFace(GL_BACK);    // remove faces facing the background
 
     glEnable(GL_LINE_SMOOTH);
     glShadeModel(GL_FLAT);
@@ -448,31 +447,30 @@ void mouseClick(int button, int state, int x, int y) {
 // Trackball: Effettua la rotazione del vettore posizione sulla trackball
 void mouseActiveMotion(int x, int y) {
     // Spostamento su trackball del vettore posizione Camera
-    if (!moving_trackball) {
-        return;
+    if (moving_trackball) {
+        glm::vec3 destination = getTrackBallPoint(x, y);
+        glm::vec3 origin = getTrackBallPoint(last_mouse_pos_X, last_mouse_pos_Y);
+        float dx, dy, dz;
+        dx = destination.x - origin.x;
+        dy = destination.y - origin.y;
+        dz = destination.z - origin.z;
+        if (dx || dy || dz) {
+            // rotation angle = acos( (v dot w) / (len(v) * len(w)) ) o approssimato da ||dest-orig||;
+            float pi = glm::pi<float>();
+            float angle = sqrt(dx * dx + dy * dy + dz * dz) * (180.0 / pi);
+            // rotation axis = (dest vec orig) / (len(dest vec orig))
+            glm::vec3 rotation_vec = glm::cross(origin, destination);
+            // calcolo del vettore direzione w = C - A
+            glm::vec4 direction = viewSetup.position - viewSetup.target;
+            // rotazione del vettore direzione w
+            // determinazione della nuova posizione della camera
+            viewSetup.position =
+                    viewSetup.target + glm::rotate(glm::mat4(1.0f), glm::radians(-angle), rotation_vec) * direction;
+        }
+        last_mouse_pos_X = x;
+        last_mouse_pos_Y = y;
+        glutPostRedisplay();
     }
-    glm::vec3 destination = getTrackBallPoint(x, y);
-    glm::vec3 origin = getTrackBallPoint(last_mouse_pos_X, last_mouse_pos_Y);
-    float dx, dy, dz;
-    dx = destination.x - origin.x;
-    dy = destination.y - origin.y;
-    dz = destination.z - origin.z;
-    if (dx || dy || dz) {
-        // rotation angle = acos( (v dot w) / (len(v) * len(w)) ) o approssimato da ||dest-orig||;
-        float pi = glm::pi<float>();
-        float angle = sqrt(dx * dx + dy * dy + dz * dz) * (180.0 / pi);
-        // rotation axis = (dest vec orig) / (len(dest vec orig))
-        glm::vec3 rotation_vec = glm::cross(origin, destination);
-        // calcolo del vettore direzione w = C - A
-        glm::vec4 direction = viewSetup.position - viewSetup.target;
-        // rotazione del vettore direzione w
-        // determinazione della nuova posizione della camera
-        viewSetup.position =
-                viewSetup.target + glm::rotate(glm::mat4(1.0f), glm::radians(-angle), rotation_vec) * direction;
-    }
-    last_mouse_pos_X = x;
-    last_mouse_pos_Y = y;
-    glutPostRedisplay();
 }
 
 // Keyboard:  g traslate r rotate s scale x,y,z axis esc
