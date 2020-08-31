@@ -75,13 +75,14 @@ void loadObjFile(string file_path, Mesh *mesh) {
 
 // Genera i buffer per la mesh in input e ne salva i puntatori di openGL
 void generate_and_load_buffers(Mesh *mesh) {
-    // Genero 1 Vertex Array Object
+    // generate 1 Vertex Array Object
     glGenVertexArrays(1, &mesh->vertexArrayObjID);
     glBindVertexArray(mesh->vertexArrayObjID);
 
-    // Genero 1 Vertex Buffer Object per i vertici
+    // generate 1 Vertex Buffer Object for vertices
     glGenBuffers(1, &mesh->vertexBufferObjID);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBufferObjID);
+    // GL_STATIC_DRAW -> data stored will not be modified
     glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(glm::vec3), &mesh->vertices[0], GL_STATIC_DRAW);
     glVertexPointer(
             3,                  // size
@@ -92,7 +93,8 @@ void generate_and_load_buffers(Mesh *mesh) {
 
     //TODO caricamento normali in memoria
 
-    // Genero 1 Element Buffer Object per gli indici, Nota: GL_ELEMENT_ARRAY_BUFFER
+    // generate 1 Element Buffer Object for indicies, Nota: GL_ELEMENT_ARRAY_BUFFER
+    // this array will contain indicies refering to previous shape
     glGenBuffers(1, &mesh->indexBufferObjID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferObjID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indices.size() * sizeof(GLshort), mesh->indices.data(), GL_STATIC_DRAW);
@@ -125,90 +127,6 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
     }
     glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
     glPopMatrix();
-}
-
-
-void init() {
-// Default render settings
-    OperationMode = NAVIGATION;
-
-    glEnable(GL_DEPTH_TEST);    // Hidden surface removal
-
-    glEnable(GL_LINE_SMOOTH);
-    glShadeModel(GL_FLAT);
-    //FOG Setup for nice backgound transition
-    glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, GL_LINEAR);
-    GLfloat fog_color[4] = {0.5, 0.5, 0.5, 1.0};
-    glFogfv(GL_FOG_COLOR, fog_color);
-    glFogf(GL_FOG_START, 50.0f);
-    glFogf(GL_FOG_END, 500.0f);
-    // Light Setup
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-
-    // Materials setup
-    materials.resize(4);
-    materials[MaterialType::RED_PLASTIC].name = "Red Plastic";
-    materials[MaterialType::RED_PLASTIC].ambient = red_plastic_ambient;
-    materials[MaterialType::RED_PLASTIC].diffuse = red_plastic_diffuse;
-    materials[MaterialType::RED_PLASTIC].specular = red_plastic_specular;
-    materials[MaterialType::RED_PLASTIC].shiness = red_plastic_shininess;
-
-    materials[MaterialType::EMERALD].name = "Emerald";
-    materials[MaterialType::EMERALD].ambient = emerald_ambient;
-    materials[MaterialType::EMERALD].diffuse = emerald_diffuse;
-    materials[MaterialType::EMERALD].specular = emerald_specular;
-    materials[MaterialType::EMERALD].shiness = emerald_shininess;
-
-    materials[MaterialType::BRASS].name = "Brass";
-    materials[MaterialType::BRASS].ambient = brass_ambient;
-    materials[MaterialType::BRASS].diffuse = brass_diffuse;
-    materials[MaterialType::BRASS].specular = brass_specular;
-    materials[MaterialType::BRASS].shiness = brass_shininess;
-
-    materials[MaterialType::SLATE].name = "Slate";
-    materials[MaterialType::SLATE].ambient = slate_ambient;
-    materials[MaterialType::SLATE].diffuse = slate_diffuse;
-    materials[MaterialType::SLATE].specular = slate_specular;
-    materials[MaterialType::SLATE].shiness = slate_shiness;
-
-    // Camera Setup
-    viewSetup = {};
-    viewSetup.position = glm::vec4(10.0, 10.0, 10.0, 1.0);
-    viewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
-    viewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
-    perspectiveSetup = {};
-    perspectiveSetup.aspect = (GLfloat) WindowWidth / (GLfloat) WindowHeight;
-    perspectiveSetup.fovY = 45.0f;
-    perspectiveSetup.far_plane = 2000.0f;
-    perspectiveSetup.near_plane = 1.0f;
-
-    string objectNames[] = {"sphere","cow","horse"};
-    vector<glm::vec4> startingpositions = {
-            {0,0,0,0},
-            {0,0,-5,-5},
-            {0,0,10,10}
-    };
-
-    for (unsigned int i=0; i< size(objectNames); i++) {
-        string objectName = objectNames[i];
-        // Mesh Loading
-        Mesh mesh = {};
-        loadObjFile(MeshDir + objectName + ".obj", &mesh);
-        generate_and_load_buffers(&mesh);
-        // Object Setup
-        Object obj = {};
-        obj.mesh = mesh;
-        obj.material = MaterialType::RED_PLASTIC;
-        obj.name = objectName;
-        glLoadIdentity();
-        selected_object = i;
-        glGetFloatv(GL_MODELVIEW_MATRIX, obj.model_matrix);
-        objects.push_back(obj);
-        modifyModelMatrix(startingpositions[i],glm::vec4(1),0.f,1.0f);
-    }
 }
 
 // disegna l'origine del assi
@@ -291,7 +209,7 @@ void display() {
     glPushMatrix();
     glTranslatef(lightpos.x, lightpos.y, lightpos.z);
     glColor4d(1, 1, 1, 1);
-    glutSolidSphere(0.1, 10, 10); // Ligh ball
+    glutSolidSphere(0.1, 10, 10); // Light ball
     glPopMatrix();
     drawAxis(3.0, 1); // The central Axis point of reference
     drawGrid(10.0, 100); // The horizontal grid
@@ -320,6 +238,92 @@ void display() {
     printToScreen();
 
     glutSwapBuffers();
+}
+
+void init() {
+// Default render settings
+    OperationMode = NAVIGATION;
+
+    glEnable(GL_DEPTH_TEST);    // Hidden surface removal
+
+    glEnable(GL_LINE_SMOOTH); //enable line antialiasing
+    glShadeModel(GL_FLAT); //start with default flat shading
+    //FOG Setup for nice background transition
+    glEnable(GL_FOG); // enable shader placeholder "fog"
+    glFogi(GL_FOG_MODE, GL_LINEAR);  // type of fog
+    GLfloat fog_color[4] = {0.5, 0.5, 0.5, 1.0};
+    glFogfv(GL_FOG_COLOR, fog_color);
+    glFogf(GL_FOG_START, 50.0f);
+    glFogf(GL_FOG_END, 500.0f);
+    // Light Setup
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0); //enable light 0 in the evaluation of the lighting equation
+
+
+    // Materials setup
+    materials.resize(4);
+    materials[MaterialType::RED_PLASTIC].name = "Red Plastic";
+    materials[MaterialType::RED_PLASTIC].ambient = red_plastic_ambient;
+    materials[MaterialType::RED_PLASTIC].diffuse = red_plastic_diffuse;
+    materials[MaterialType::RED_PLASTIC].specular = red_plastic_specular;
+    materials[MaterialType::RED_PLASTIC].shiness = red_plastic_shininess;
+
+    materials[MaterialType::EMERALD].name = "Emerald";
+    materials[MaterialType::EMERALD].ambient = emerald_ambient;
+    materials[MaterialType::EMERALD].diffuse = emerald_diffuse;
+    materials[MaterialType::EMERALD].specular = emerald_specular;
+    materials[MaterialType::EMERALD].shiness = emerald_shininess;
+
+    materials[MaterialType::BRASS].name = "Brass";
+    materials[MaterialType::BRASS].ambient = brass_ambient;
+    materials[MaterialType::BRASS].diffuse = brass_diffuse;
+    materials[MaterialType::BRASS].specular = brass_specular;
+    materials[MaterialType::BRASS].shiness = brass_shininess;
+
+    materials[MaterialType::SLATE].name = "Slate";
+    materials[MaterialType::SLATE].ambient = slate_ambient;
+    materials[MaterialType::SLATE].diffuse = slate_diffuse;
+    materials[MaterialType::SLATE].specular = slate_specular;
+    materials[MaterialType::SLATE].shiness = slate_shiness;
+
+    // Camera Setup
+    viewSetup = {};
+    viewSetup.position = glm::vec4(10.0, 10.0, 10.0, 1.0);
+    viewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
+    viewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
+    perspectiveSetup = {};
+    perspectiveSetup.aspect = (GLfloat) WindowWidth / (GLfloat) WindowHeight;
+    perspectiveSetup.fovY = 45.0f;
+    perspectiveSetup.far_plane = 2000.0f;
+    perspectiveSetup.near_plane = 1.0f;
+
+    string objectNames[] = {"sphere","cow","horse"};
+    vector<glm::vec4> startingpositions = {
+            {0,0,0,0},
+            {0,0,-5,-5},
+            {0,0,10,10}
+    };
+
+    for (unsigned int i=0; i< size(objectNames); i++) {
+        string objectName = objectNames[i];
+        // Mesh Loading
+        Mesh mesh = {};
+        loadObjFile(MeshDir + objectName + ".obj", &mesh);
+        generate_and_load_buffers(&mesh);
+        // Object Setup
+        Object obj = {};
+        obj.mesh = mesh;
+        obj.material = MaterialType::RED_PLASTIC;
+        obj.name = objectName;
+        glLoadIdentity();
+        selected_object = i;
+        glGetFloatv(GL_MODELVIEW_MATRIX, obj.model_matrix);
+        objects.push_back(obj);
+        modifyModelMatrix(startingpositions[i],glm::vec4(1),0.f,1.0f);
+    }
+
+    // call display directly to show every object in the scene
+    display();
 }
 
 // Trackball: Converte un punto 2D sullo schermo in un punto 3D sulla trackball
@@ -629,7 +633,6 @@ int main(int argc, char **argv) {
     );
     init();
     buildOpenGLMenu();
-
 
     glutMainLoop();
 
