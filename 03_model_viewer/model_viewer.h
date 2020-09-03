@@ -43,24 +43,24 @@ const GLfloat emerald_shininess = 78.8;
 const glm::vec3 slate_ambient = {0.02, 0.02, 0.02}, slate_diffuse = {0.02, 0.01, 0.01}, slate_specular{0.4, 0.4, 0.4};
 const GLfloat slate_shiness = .78125f;
 
-enum {
+typedef enum {
     NAVIGATION,
     CAMERA_MOVING,
     TRASLATING,
     ROTATING,
     SCALING
-} OperationMode;
+} operationMode ;
 
-enum {
+typedef enum {
     OCS, // Object Coordinate System
     WCS // World Coordinate System
-} TransformMode;
+} transformMode;
 
-enum {
+typedef enum {
     X,
     Y,
     Z
-} WorkingAxis;
+} workingAxis;
 
 typedef struct {
     std::vector<glm::vec3> vertices;
@@ -120,3 +120,6 @@ extern PerspectiveSetup perspectiveSetup;
 extern vector<Object> objects;
 extern vector<Material> materials;
 extern  unsigned int selected_object;
+extern operationMode OperationMode;
+extern transformMode TransformMode;
+extern workingAxis WorkingAxis;

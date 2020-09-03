@@ -41,6 +41,9 @@ static int last_mouse_pos_X;
 vector<Object> objects;
 vector<Material> materials;
 unsigned int selected_object = 0;
+operationMode OperationMode;
+transformMode TransformMode;
+workingAxis WorkingAxis;
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {
@@ -69,7 +72,8 @@ void loadObjFile(string file_path, Mesh *mesh) {
     }
 
     // Norms allocation
-    mesh->normals.reserve(mesh->vertices.size());
+    // use resize to guarantee size and default value
+    mesh->normals.resize(mesh->vertices.size(), glm::vec3(0.0,0.0,0.0));
     // triangular mesh, Max-Nelson Method
     for (int i = 0; i < mesh->indices.size(); i += 3) {
         GLuint a = mesh->indices[i];
@@ -364,7 +368,6 @@ glm::vec3 getTrackBallPoint(float x, float y) {
 }
 
 void zoom(float dir) {
-    fprintf(stdout,"zoom\n");
     // P1 = P0 + tv
     float v[3];
     float t = 0.1f * dir;
@@ -377,7 +380,6 @@ void zoom(float dir) {
 }
 
 void horizontalPan(float dir) {
-    fprintf(stdout,"horizontal_pan\n");
     using namespace glm;
     vec3 lookAt(viewSetup.target), position(viewSetup.position), upVector(viewSetup.upVector);
 
@@ -390,7 +392,6 @@ void horizontalPan(float dir) {
 }
 
 void verticalPan(float dir) {
-    fprintf(stdout,"vertical_pan\n");
     using namespace glm;
     vec3 lookAt(viewSetup.target), position(viewSetup.position), upVector(viewSetup.upVector);
 
