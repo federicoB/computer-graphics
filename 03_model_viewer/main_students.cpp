@@ -19,10 +19,8 @@ based on the OpenGL Shading Language (GLSL) specifications.
 #include "window.h"
 
 //keyboard macros
-#define SHIFT_WHEEL_UP 11
-#define SHIFT_WHEEL_DOWN 12
-#define CTRL_WHEEL_UP 19
-#define CTRL_WHEEL_DOWN 20
+#define WHEEL_UP 3
+#define WHEEL_DOWN 4
 
 using namespace std;
 
@@ -70,7 +68,24 @@ void loadObjFile(string file_path, Mesh *mesh) {
         }
     }
 
-    //TODO calcolo normali
+    // Norms allocation
+    mesh->normals.reserve(mesh->vertices.size());
+    // triangular mesh, Max-Nelson Method
+    for (int i = 0; i < mesh->indices.size(); i += 3) {
+        GLuint a = mesh->indices[i];
+        GLuint b = mesh->indices[i + 1];
+        GLuint c = mesh->indices[i + 2];
+
+        glm::vec3 normal = normalize(cross(mesh->vertices[b] - mesh->vertices[a], mesh->vertices[c]- mesh->vertices[a]));
+
+        mesh->normals[a] = normal;
+        mesh->normals[b] = normal;
+        mesh->normals[c] = normal;
+    }
+
+    // normalization of averange of norms for each vertex
+    for (int i = 0; i < mesh->normals.size(); i++)
+        mesh->normals[i] = normalize(mesh->normals[i]);
 }
 
 // Genera i buffer per la mesh in input e ne salva i puntatori di openGL
@@ -91,7 +106,15 @@ void generate_and_load_buffers(Mesh *mesh) {
             (void *) 0            // array buffer offset
     );
 
-    //TODO caricamento normali in memoria
+    //caricamento normali in memoria
+    glGenBuffers(1, &mesh->normalBufferObjID);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->normalBufferObjID);
+    glBufferData(GL_ARRAY_BUFFER, mesh->normals.size() * sizeof(glm::vec3), &mesh->normals[0], GL_STATIC_DRAW);
+    glNormalPointer(
+            GL_FLOAT,           // type
+            0,                  // stride
+            (void*)0            // array buffer offset
+    );
 
     // generate 1 Element Buffer Object for indicies, Nota: GL_ELEMENT_ARRAY_BUFFER
     // this array will contain indicies refering to previous shape
@@ -230,6 +253,7 @@ void display() {
         glMaterialf(GL_FRONT, GL_SHININESS, mat.shiness);
 
         glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
         glBindVertexArray(object.mesh.vertexArrayObjID);
         glDrawElements(GL_TRIANGLES, object.mesh.indices.size(), GL_UNSIGNED_SHORT, (void *) 0);
         glPopMatrix();
@@ -339,28 +363,44 @@ glm::vec3 getTrackBallPoint(float x, float y) {
     return point;
 }
 
-void moveCameraForeward() {
-    //TODO moveCameraForeward
+void zoom(float dir) {
+    fprintf(stdout,"zoom\n");
+    // P1 = P0 + tv
+    float v[3];
+    float t = 0.1f * dir;
+
+    for (int i = 0; i < 3; i++) {
+        v[i] = viewSetup.target[i] - viewSetup.position[i]; // v = vector from camera to focused point
+        v[i] *= t; // tv = multiply vector by direction
+        viewSetup.position[i] += v[i]; // P1 = camera position + vector to origin multiplied by some value
+    }
 }
 
-void moveCameraBack() {
-    //TODO moveCameraBack
+void horizontalPan(float dir) {
+    fprintf(stdout,"horizontal_pan\n");
+    using namespace glm;
+    vec3 lookAt(viewSetup.target), position(viewSetup.position), upVector(viewSetup.upVector);
+
+    vec3 direction = lookAt - position;
+    vec3 normalToPlane = normalize(cross(direction, upVector));
+    vec4 increment(normalToPlane.x * dir, normalToPlane.y * dir, normalToPlane.z * dir, 1.0);
+
+    viewSetup.target += increment;
+    viewSetup.position += increment;
 }
 
-void moveCameraLeft() {
-    //TODO moveCameraLeft
-}
+void verticalPan(float dir) {
+    fprintf(stdout,"vertical_pan\n");
+    using namespace glm;
+    vec3 lookAt(viewSetup.target), position(viewSetup.position), upVector(viewSetup.upVector);
 
-void moveCameraRight() {
-    //TODO moveCameraRight
-}
+    vec3 direction = lookAt - position;
+    vec3 normalToPlane = normalize(cross(direction, upVector));
+    vec3 normalToNormalToPlane = -normalize(cross(direction, normalToPlane));
+    vec4 increment(normalToNormalToPlane.x * dir, normalToNormalToPlane.y * dir, normalToNormalToPlane.z * dir, 1.0);
 
-void moveCameraUp() {
-    //TODO moveCameraUp
-}
-
-void moveCameraDown() {
-    //TODO moveCameraDown
+    viewSetup.target += increment;
+    viewSetup.position += increment;
 }
 
 void mouseClick(int button, int state, int x, int y) {
@@ -368,22 +408,22 @@ void mouseClick(int button, int state, int x, int y) {
     int modifiers = glutGetModifiers();
     if (modifiers == GLUT_ACTIVE_SHIFT) {
         switch (button) {
-            case SHIFT_WHEEL_UP:
-                moveCameraUp();
+            case WHEEL_UP:
+                verticalPan(CAMERA_TRASLATION_SPEED);
                 break;
-            case SHIFT_WHEEL_DOWN:
-                moveCameraDown();
+            case WHEEL_DOWN:
+                verticalPan(-CAMERA_TRASLATION_SPEED);
                 break;
         }
         return;
     }
     if (modifiers == GLUT_ACTIVE_CTRL) {
         switch (button) {
-            case CTRL_WHEEL_UP:
-                moveCameraRight();
+            case WHEEL_UP:
+                horizontalPan(CAMERA_TRASLATION_SPEED);
                 break;
-            case CTRL_WHEEL_DOWN:
-                moveCameraLeft();
+            case WHEEL_DOWN:
+                horizontalPan(-CAMERA_TRASLATION_SPEED);
                 break;
         }
         return;
@@ -438,9 +478,9 @@ void mouseClick(int button, int state, int x, int y) {
         case NAVIGATION:
             // Wheel reports as button 3(scroll up) and button 4(scroll down)
             if (button == 3) {
-                moveCameraBack();
+                zoom(CAMERA_ZOOM_SPEED);
             } else if (button == 4) {
-                moveCameraForeward();
+                zoom(-CAMERA_ZOOM_SPEED);
             }
             break;
         default:
