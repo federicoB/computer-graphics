@@ -2,6 +2,10 @@
 // Created by fede on 19/08/20.
 //
 
+static int WindowWidth = 1366;
+static int WindowHeight = 768;
+static GLfloat aspect_ratio = 16.0f / 9.0f;
+
 void init_window(int argc, char **argv) {
 
     // initialize openGL Utility Toolkit
@@ -99,4 +103,68 @@ void printToScreen() {
     glEnable(GL_LIGHTING);
 
     resize(WindowWidth, WindowHeight);
+}
+
+// disegna l'origine del assi
+void drawAxis(float scale, int drawLetters) {
+    glPushMatrix();
+    glScalef(scale, scale, scale);
+    glBegin(GL_LINES);
+
+    glColor4d(1.0, 0.0, 0.0, 1.0);
+    if (drawLetters) {
+        glVertex3f(.8f, 0.05f, 0.0);
+        glVertex3f(1.0, 0.25f, 0.0); /* Letter X */
+        glVertex3f(0.8f, .25f, 0.0);
+        glVertex3f(1.0, 0.05f, 0.0);
+    }
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(1.0, 0.0, 0.0); /* X axis      */
+
+
+    glColor4d(0.0, 1.0, 0.0, 1.0);
+    if (drawLetters) {
+        glVertex3f(0.10f, 0.8f, 0.0);
+        glVertex3f(0.10f, 0.90f, 0.0); /* Letter Y */
+        glVertex3f(0.10f, 0.90f, 0.0);
+        glVertex3f(0.05, 1.0, 0.0);
+        glVertex3f(0.10f, 0.90f, 0.0);
+        glVertex3f(0.15, 1.0, 0.0);
+    }
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(0.0, 1.0, 0.0); /* Y axis      */
+
+
+    glColor4d(0.0, 0.0, 1.0, 1.0);
+    if (drawLetters) {
+        glVertex3f(0.05f, 0, 0.8f);
+        glVertex3f(0.20f, 0, 0.8f); /* Letter Z*/
+        glVertex3f(0.20f, 0, 0.8f);
+        glVertex3f(0.05, 0, 1.0);
+        glVertex3f(0.05f, 0, 1.0);
+        glVertex3f(0.20, 0, 1.0);
+    }
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(0.0, 0.0, 1.0); /* Z axis    */
+
+    glEnd();
+    glPopMatrix();
+}
+
+// disegna la griglia del piano xz (white)
+void drawGrid(float scale, int dimension) {
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glPushMatrix();
+    glScalef(scale, scale, scale);
+    glBegin(GL_LINES);
+    for (int x = -dimension; x < dimension; x++) {
+        glVertex3f(x, 0.0f, -dimension);
+        glVertex3f(x, 0.0f, dimension);
+    }
+    for (int z = -dimension; z < dimension; z++) {
+        glVertex3f(-dimension, 0.0f, z);
+        glVertex3f(dimension, 0.0f, z);
+    }
+    glEnd();
+    glPopMatrix();
 }

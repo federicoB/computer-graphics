@@ -20,12 +20,6 @@
 
 using namespace std;
 
-const string MeshDir = "Mesh/";
-
-static int WindowWidth = 1366;
-static int WindowHeight = 768;
-static GLfloat aspect_ratio = 16.0f / 9.0f;
-
 // Materiali disponibili
 const glm::vec3 red_plastic_ambient = {0.0, 0.0, 0.0},
         red_plastic_diffuse = {0.5, 0.0, 0.0},
@@ -95,45 +89,12 @@ typedef struct {
     string name;
 } Object;
 
-typedef enum {
-    WIRE_FRAME,
-    FACE_FILL,
-    FLAT_SHADING,
-    SMOOTH_SHADING,
-    CULLING_ON,
-    CULLING_OFF,
-    CHANGE_TO_WCS,
-    CHANGE_TO_OCS
-} MenuOption;
-
-struct ViewSetup{
-    glm::vec4 position;
-    glm::vec4 target;
-    glm::vec4 upVector;
-};
-struct PerspectiveSetup{
-    float fovY, aspect, near_plane, far_plane;
-};
-
-//keyboard macros
-#define WHEEL_UP 3
-#define WHEEL_DOWN 4
 
 using namespace std;
 
 static glm::vec4 lightpos = {5.0f, 5.0f, 5.0f, 1.0f};
 
-/*camera structures*/
-constexpr float CAMERA_ZOOM_SPEED = 0.1f;
-constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
-
-struct ViewSetup viewSetup;
-
-struct PerspectiveSetup perspectiveSetup;
-
 static bool moving_trackball = 0;
-static int last_mouse_pos_Y;
-static int last_mouse_pos_X;
 
 vector<Object> objects;
 vector<Material> materials;

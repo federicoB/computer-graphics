@@ -4,6 +4,14 @@
 
 //all keyboard and mouse event handlers
 
+
+//keyboard macros
+#define WHEEL_UP 3
+#define WHEEL_DOWN 4
+
+static int last_mouse_pos_Y;
+static int last_mouse_pos_X;
+
 // Keyboard:  g traslate r rotate s scale x,y,z axis esc
 void keyboardDown(unsigned char key, int x, int y) {
     switch (key) {
@@ -50,6 +58,8 @@ void special(int key, int x, int y) {
     }
     glutPostRedisplay();
 }
+
+#include "view_utilis.cpp"
 
 // Trackball: Effettua la rotazione del vettore posizione sulla trackball
 void mouseActiveMotion(int x, int y) {
