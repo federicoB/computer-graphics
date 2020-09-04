@@ -150,6 +150,7 @@ void mouseClick(int button, int state, int x, int y) {
             modifyModelMatrix(glm::vec4(0), axis, amount * 20.0f, 1.0f);
             break;
         case SCALING:
+            //TODO fix texture scaling
             modifyModelMatrix(glm::vec4(0), axis, 0.0f, 1.0f + amount);
             break;
         case NAVIGATION:

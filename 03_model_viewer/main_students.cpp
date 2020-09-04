@@ -16,34 +16,7 @@ based on the OpenGL Shading Language (GLSL) specifications.
 
 #define _CRT_SECURE_NO_WARNINGS // for fscanf
 
-#include "window.h"
-
-//keyboard macros
-#define WHEEL_UP 3
-#define WHEEL_DOWN 4
-
-using namespace std;
-
-static glm::vec4 lightpos = {5.0f, 5.0f, 5.0f, 1.0f};
-
-/*camera structures*/
-constexpr float CAMERA_ZOOM_SPEED = 0.1f;
-constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
-
-struct ViewSetup viewSetup;
-
-struct PerspectiveSetup perspectiveSetup;
-
-static bool moving_trackball = 0;
-static int last_mouse_pos_Y;
-static int last_mouse_pos_X;
-
-vector<Object> objects;
-vector<Material> materials;
-unsigned int selected_object = 0;
-operationMode OperationMode;
-transformMode TransformMode;
-workingAxis WorkingAxis;
+#include "constants.cpp"
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {
@@ -222,7 +195,8 @@ void drawGrid(float scale, int dimension) {
     glPopMatrix();
 }
 
-
+#include "HUD_Logger.cpp"
+#include "window.cpp"
 
 void display() {
     // grey background color

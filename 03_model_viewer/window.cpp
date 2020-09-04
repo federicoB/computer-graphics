@@ -2,10 +2,6 @@
 // Created by fede on 19/08/20.
 //
 
-
-#include "window.h"
-#include "HUD_Logger.h"
-
 void init_window(int argc, char **argv) {
 
     // initialize openGL Utility Toolkit
@@ -38,6 +34,8 @@ void resize(int w, int h) {
               viewSetup.target.x, viewSetup.target.y, viewSetup.target.z,
               viewSetup.upVector.x, viewSetup.upVector.y, viewSetup.upVector.z);
 }
+
+#include "HUD_Logger.cpp"
 
 /*Logging to screen*/
 void printToScreen() {

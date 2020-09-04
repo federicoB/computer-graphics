@@ -1,9 +1,6 @@
 //
-// Created by fede on 17/08/20.
+// Created by fede on 04/09/20.
 //
-
-#pragma once
-
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -25,6 +22,10 @@ using namespace std;
 
 const string MeshDir = "Mesh/";
 
+static int WindowWidth = 1366;
+static int WindowHeight = 768;
+static GLfloat aspect_ratio = 16.0f / 9.0f;
+
 // Materiali disponibili
 const glm::vec3 red_plastic_ambient = {0.0, 0.0, 0.0},
         red_plastic_diffuse = {0.5, 0.0, 0.0},
@@ -43,24 +44,24 @@ const GLfloat emerald_shininess = 78.8;
 const glm::vec3 slate_ambient = {0.02, 0.02, 0.02}, slate_diffuse = {0.02, 0.01, 0.01}, slate_specular{0.4, 0.4, 0.4};
 const GLfloat slate_shiness = .78125f;
 
-typedef enum {
+enum {
     NAVIGATION,
     CAMERA_MOVING,
     TRASLATING,
     ROTATING,
     SCALING
-} operationMode ;
+} OperationMode ;
 
-typedef enum {
+enum {
     OCS, // Object Coordinate System
     WCS // World Coordinate System
-} transformMode;
+} TransformMode;
 
-typedef enum {
+enum {
     X,
     Y,
     Z
-} workingAxis;
+} WorkingAxis;
 
 typedef struct {
     std::vector<glm::vec3> vertices;
@@ -114,12 +115,26 @@ struct PerspectiveSetup{
     float fovY, aspect, near_plane, far_plane;
 };
 
-extern ViewSetup viewSetup;
-extern PerspectiveSetup perspectiveSetup;
+//keyboard macros
+#define WHEEL_UP 3
+#define WHEEL_DOWN 4
 
-extern vector<Object> objects;
-extern vector<Material> materials;
-extern  unsigned int selected_object;
-extern operationMode OperationMode;
-extern transformMode TransformMode;
-extern workingAxis WorkingAxis;
+using namespace std;
+
+static glm::vec4 lightpos = {5.0f, 5.0f, 5.0f, 1.0f};
+
+/*camera structures*/
+constexpr float CAMERA_ZOOM_SPEED = 0.1f;
+constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
+
+struct ViewSetup viewSetup;
+
+struct PerspectiveSetup perspectiveSetup;
+
+static bool moving_trackball = 0;
+static int last_mouse_pos_Y;
+static int last_mouse_pos_X;
+
+vector<Object> objects;
+vector<Material> materials;
+unsigned int selected_object = 0;
