@@ -2,6 +2,8 @@
 // Created by fede on 19/08/20.
 //
 
+#pragma once
+
 static int WindowWidth = 1366;
 static int WindowHeight = 768;
 static GLfloat aspect_ratio = 16.0f / 9.0f;
@@ -26,12 +28,14 @@ void resize(int w, int h) {
     WindowWidth = w;
     WindowHeight = h;
 
+    // applies subsequent matrix operations to the projection matrix stack
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(perspectiveSetup.fovY, perspectiveSetup.aspect, perspectiveSetup.near_plane,
                    perspectiveSetup.far_plane);
 
 
+    // applies subsequent matrix operations to the modelview matrix stack
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(viewSetup.position.x, viewSetup.position.y, viewSetup.position.z,

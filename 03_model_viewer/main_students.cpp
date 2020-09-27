@@ -32,10 +32,10 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
 
     switch (TransformMode) {
         case WCS:
-            //TODO do something different for WCS ad OCS
             glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
             glScalef(scale_factor, scale_factor, scale_factor);
             glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
+            // multiply for matrix that defines object position / rotation wrt world
             glMultMatrixf(objects[selected_object].model_matrix);
             break;
         case OCS:
@@ -97,9 +97,26 @@ void display() {
         glPopMatrix();
     }
 
+
+    if(cameraAnimation) { //perform camera animation
+        GLfloat* objectPosition = objects[selected_object].model_matrix;
+        float Px = objectPosition[12];
+        float Py = objectPosition[13];
+        float Pz = objectPosition[14];
+        if(motionPortion > 200) { // finish animation
+                cameraAnimation = false;
+                OperationMode = NAVIGATION;
+        } else // Move the camera along Bezier curve
+            motionPortion += 1;
+            deCasteljau(cameraCP, motionPortion / 200.0); // scale motionPortion from 0-200 to 0-1
+        glutPostRedisplay();
+    }
+
     printToScreen();
 
     glutSwapBuffers();
+
+
 }
 
 void init() {
@@ -150,7 +167,7 @@ void init() {
 
     // Camera Setup
     viewSetup = {};
-    viewSetup.position = glm::vec4(10.0, 10.0, 10.0, 1.0);
+    viewSetup.position = glm::vec4(-10.0, 5.0, -10.0, 1.0);
     viewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
     viewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
     perspectiveSetup = {};
@@ -159,11 +176,11 @@ void init() {
     perspectiveSetup.far_plane = 2000.0f;
     perspectiveSetup.near_plane = 1.0f;
 
-    string objectNames[] = {"sphere","cow","horse"};
+    string objectNames[] = {"cow","horse","sphere"};
     vector<glm::vec4> startingpositions = {
-            {0,0,0,0},
-            {0,0,-5,-5},
-            {0,0,10,10}
+            {-5,0,5,0},
+            {20,0,5,0},
+            {0,0,0,0}
     };
 
     for (unsigned int i=0; i< size(objectNames); i++) {

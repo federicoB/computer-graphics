@@ -25,6 +25,10 @@ void keyboardDown(unsigned char key, int x, int y) {
         case 's':
             OperationMode = SCALING;
             break;
+        case ' ':
+            OperationMode = CAMERA_MOVING;
+            if(!cameraAnimation) create_camera_animation_path();
+            break;
         case 27:
             glutLeaveMainLoop();
             break;
@@ -46,17 +50,18 @@ void keyboardDown(unsigned char key, int x, int y) {
 
 // Special key arrow: select active object (arrows left,right)
 void special(int key, int x, int y) {
-    switch (key) {
-        case GLUT_KEY_LEFT:
-            selected_object = selected_object == 0 ? objects.size() - 1 : selected_object - 1;
-            break;
-        case GLUT_KEY_RIGHT:
-            selected_object = (selected_object + 1) % objects.size();
-            break;
-        default:
-            break;
-    }
-    glutPostRedisplay();
+    if (!cameraAnimation) //changing selected object is blocked during camera animation
+        switch (key) {
+            case GLUT_KEY_LEFT:
+                    selected_object = selected_object == 0 ? objects.size() - 1 : selected_object - 1;
+                break;
+            case GLUT_KEY_RIGHT:
+                    selected_object = (selected_object + 1) % objects.size();
+                break;
+            default:
+                break;
+        }
+        glutPostRedisplay();
 }
 
 #include "view_utilis.cpp"
@@ -91,29 +96,31 @@ void mouseActiveMotion(int x, int y) {
 }
 
 void mouseClick(int button, int state, int x, int y) {
-    glutPostRedisplay();
-    int modifiers = glutGetModifiers();
-    if (modifiers == GLUT_ACTIVE_SHIFT) {
-        switch (button) {
-            case WHEEL_UP:
-                verticalPan(CAMERA_TRASLATION_SPEED);
-                break;
-            case WHEEL_DOWN:
-                verticalPan(-CAMERA_TRASLATION_SPEED);
-                break;
+    if (!cameraAnimation) { //mouse is disabled during camera animation
+        glutPostRedisplay();
+        int modifiers = glutGetModifiers();
+        if (modifiers == GLUT_ACTIVE_SHIFT) {
+            switch (button) {
+                case WHEEL_UP:
+                    verticalPan(CAMERA_TRASLATION_SPEED);
+                    break;
+                case WHEEL_DOWN:
+                    verticalPan(-CAMERA_TRASLATION_SPEED);
+                    break;
+            }
+            return;
         }
-        return;
-    }
-    if (modifiers == GLUT_ACTIVE_CTRL) {
-        switch (button) {
-            case WHEEL_UP:
-                horizontalPan(CAMERA_TRASLATION_SPEED);
-                break;
-            case WHEEL_DOWN:
-                horizontalPan(-CAMERA_TRASLATION_SPEED);
-                break;
+        if (modifiers == GLUT_ACTIVE_CTRL) {
+            switch (button) {
+                case WHEEL_UP:
+                    horizontalPan(CAMERA_TRASLATION_SPEED);
+                    break;
+                case WHEEL_DOWN:
+                    horizontalPan(-CAMERA_TRASLATION_SPEED);
+                    break;
+            }
+            return;
         }
-        return;
     }
 
 

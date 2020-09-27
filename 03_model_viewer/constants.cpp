@@ -92,7 +92,7 @@ typedef struct {
 
 using namespace std;
 
-static glm::vec4 lightpos = {5.0f, 5.0f, 5.0f, 1.0f};
+static glm::vec4 lightpos = {-8.0f, 5.0f, -6.0f, 1.0f};
 
 static bool moving_trackball = 0;
 
