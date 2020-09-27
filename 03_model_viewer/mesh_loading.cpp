@@ -49,6 +49,8 @@ void loadObjFile(string file_path, Mesh *mesh) {
     // normalization of averange of norms for each vertex
     for (int i = 0; i < mesh->normals.size(); i++)
         mesh->normals[i] = normalize(mesh->normals[i]);
+
+    glEnable(GL_NORMALIZE);
 }
 
 // Genera i buffer per la mesh in input e ne salva i puntatori di openGL

@@ -18,8 +18,6 @@ based on the OpenGL Shading Language (GLSL) specifications.
 
 #include "constants.cpp"
 
-// TODO implement camera animation along path
-
 /*
 	Crea ed applica la matrice di trasformazione alla matrice dell'oggeto discriminando tra WCS e OCS.
 	La funzione � gia invocata con un input corretto, � sufficiente concludere la sua implementazione.
