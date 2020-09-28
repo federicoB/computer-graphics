@@ -1,6 +1,6 @@
 // Fragment shader: Blinn shading
 // ================
-#version 450 core
+#version 320 es
 
 in vec3 E;
 in vec3 N;

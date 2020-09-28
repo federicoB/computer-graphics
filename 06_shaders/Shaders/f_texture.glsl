@@ -1,4 +1,4 @@
-#version 450 core
+#version 320 es
 
 in vec2 _TexCoord;
 // Ouput data

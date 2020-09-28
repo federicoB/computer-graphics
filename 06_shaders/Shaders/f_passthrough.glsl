@@ -1,6 +1,6 @@
 // Fragment shader: : Passthrough shading
 // ================
-#version 450 core
+#version 320 es
 
 // Ouput data
 out vec4 FragColor;
