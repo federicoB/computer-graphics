@@ -2,6 +2,7 @@
 // Created by fede on 04/09/20.
 //
 
+//TODO remove smooth/flat shading?
 typedef enum {
     WIRE_FRAME,
     FACE_FILL,
@@ -30,6 +31,7 @@ void main_menu_func(int option) {
             break;
         case MenuOption::CULLING_ON:
             glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);	// remove faces facing the background
             break;
         case MenuOption::CULLING_OFF:
             glDisable(GL_CULL_FACE);

@@ -11,12 +11,15 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <iostream>
 
 
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#define NUM_SHADERS 7
 
 using namespace std;
 
@@ -60,18 +63,19 @@ enum {
 typedef struct {
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
-    std::vector<GLushort> indices;
+    std::vector<glm::vec2> texCoords;
     GLuint vertexArrayObjID;
     GLuint vertexBufferObjID;
     GLuint normalBufferObjID;
-    GLuint indexBufferObjID;
+    GLuint uvBufferObjID;
 } Mesh;
 
 typedef enum {
     RED_PLASTIC,
     EMERALD,
     BRASS,
-    SLATE
+    SLATE,
+    NO_MATERIAL
 } MaterialType;
 
 typedef struct {
@@ -82,19 +86,64 @@ typedef struct {
     GLfloat shiness;
 } Material;
 
+typedef enum { // used also as index, don't modify order
+    GOURAUD,
+    PHONG,
+    BLINN,
+    TOON,
+    TEXTURE_ONLY,
+    PASS_THROUGH,
+    WAVE
+} ShadingType;
+
 typedef struct {
     Mesh mesh;
     MaterialType material;
-    GLfloat model_matrix[16];
+    ShadingType shading;
+    GLuint textureID;
+    glm::mat4 model_matrix;
     string name;
 } Object;
 
+typedef struct {
+    GLuint light_position_pointer;
+    GLuint light_color_pointer;
+    GLuint light_power_pointer;
+    GLuint material_diffuse;
+    GLuint material_ambient;
+    GLuint material_specular;
+    GLuint material_shininess;
+} LightShaderUniform;
+
+typedef struct {
+    GLuint P_Matrix_pointer;
+    GLuint V_Matrix_pointer;
+    GLuint M_Matrix_pointer;
+} BaseShaderUniform;
+
+
+const string TextureDir = "Textures/";
+const string ShaderDir = "Shaders/";
+
+struct {
+    // Variables controlling the torus mesh resolution
+    int NumWraps = 10;
+    int NumPerWrap = 8;
+    // Variables controlling the size of the torus
+    float MajorRadius = 3.0;
+    float MinorRadius = 1.0;
+    int torus_index;
+} TorusSetup;
 
 using namespace std;
 
-static glm::vec4 lightpos = {-8.0f, 5.0f, -6.0f, 1.0f};
+typedef struct {
+    glm::vec3 position;
+    glm::vec3 color;
+    GLfloat power;
+} point_light;
 
-static bool moving_trackball = 0;
+static point_light light;
 
 vector<Object> objects;
 vector<Material> materials;

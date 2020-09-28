@@ -82,10 +82,11 @@ float* rotate_point_around_center(float *point, float centerX, float centerZ, do
 // Create a bezier courve moving camera around object
 void create_camera_animation_path() {
     //get object positon
-    GLfloat* objectPosition = objects[selected_object].model_matrix;
-    float Ox = objectPosition[12];
-    float Oy = objectPosition[13];
-    float Oz = objectPosition[14];
+    glm::mat4 objectPosition = objects[selected_object].model_matrix;
+    //TODO check indexing
+    float Ox = objectPosition[0][3];
+    float Oy = objectPosition[1][3];
+    float Oz = objectPosition[2][3];
     //get camera position
     float Cx = viewSetup.position[0];
     float Cy = viewSetup.position[1];

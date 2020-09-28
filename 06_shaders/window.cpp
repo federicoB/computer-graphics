@@ -12,10 +12,11 @@ void init_window(int argc, char **argv) {
 
     // initialize openGL Utility Toolkit
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
+    glutSetOption(GLUT_MULTISAMPLE, 4); //activate multisampling
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowSize(WindowWidth, WindowHeight);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("Model Viewer ");
+    glutCreateWindow("Model Viewer with Shaders");
 }
 
 void resize(int w, int h) {

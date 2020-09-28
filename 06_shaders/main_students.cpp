@@ -1,23 +1,36 @@
 /******************************************************************************************
-LAB 03
+LAB 06
 Gestione interattiva di una scena 3D mediante controllo da mouse e da tastiera.
-I modelli geometrici in scena sono mesh poligonali in formato *.obj
+I modelli geometrici in scena sono mesh poligonali caricati da file in formato *.obj,  
+con associata una parametrizzazione (sfere e cubo), oggetti poligonali creati in modo procedurale
+(toroide).  
+W/w		incrementa/decrementa NumWrap toro
+N/n		incrementa/decrementa NumPerWrap toro
 
 CTRL+WHEEL = pan orizzontale della telecamera
 SHIFT+WHEEL = pan verticale della telecamera
-WHELL = ZOOM IN/OUT se si � in navigazione, altrimenti agisce sulla trasformazione dell'oggetto
-g r s	per le modalit� di lavoro: traslate/rotate/scale
+WHELL = ZOOM IN/OUT se si è in navigazione, altrimenti agisce sulla trasformazione dell'oggetto
+g r s	per le modalità di lavoro: traslate/rotate/scale
 x y z	per l'asse di lavoro
 wcs/ocs selezionabili dal menu pop-up
 
-OpenGL Mathematics (GLM) is a header only C++ mathematics library for graphics software 
+OpenGL Mathematics (GLM) is a header only C++ mathematics library for graphics software
 based on the OpenGL Shading Language (GLSL) specifications.
-*******************************************************************************************/
+***********************************com  ********************************************************/
 
 #define _CRT_SECURE_NO_WARNINGS // for fscanf
 
 #include "constants.cpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+//TODO decide where to move these
+//Shaders Uniforms
+static vector<LightShaderUniform> light_uniforms; // for shaders with light
+static vector<BaseShaderUniform> base_uniforms; // for ALL shaders
+static vector<GLuint> shaders_IDs; //Pointers to the shader programs
+static Object Axis, Grid;
 /*
 	Crea ed applica la matrice di trasformazione alla matrice dell'oggeto discriminando tra WCS e OCS.
 	La funzione � gia invocata con un input corretto, � sufficiente concludere la sua implementazione.
@@ -34,16 +47,19 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
             glScalef(scale_factor, scale_factor, scale_factor);
             glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
             // multiply for matrix that defines object position / rotation wrt world
-            glMultMatrixf(objects[selected_object].model_matrix);
+            //TODO fix with method that support glm::mat4
+            //glMultMatrixf(objects[selected_object].model_matrix);
             break;
         case OCS:
-            glMultMatrixf(objects[selected_object].model_matrix);
+            //TODO fix with method that support glm::mat4
+            //glMultMatrixf(objects[selected_object].model_matrix);
             glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
             glScalef(scale_factor, scale_factor, scale_factor);
             glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
             break;
     }
-    glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
+    //TODO fix with method that support glm::mat4
+    //glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
     glPopMatrix();
 }
 
@@ -64,9 +80,9 @@ void display() {
     // update light position
     glDisable(GL_LIGHTING);
     // light position
-    glLightfv(GL_LIGHT0, GL_POSITION, glm::value_ptr(lightpos));
+    glLightfv(GL_LIGHT0, GL_POSITION, glm::value_ptr(light.position));
     glPushMatrix();
-    glTranslatef(lightpos.x, lightpos.y, lightpos.z);
+    glTranslatef(light.position.x, light.position.y, light.position.z);
     glColor4d(1, 1, 1, 1);
     glutSolidSphere(0.1, 10, 10); // Light ball
     glPopMatrix();
@@ -76,7 +92,8 @@ void display() {
 
     for (Object object : objects) {
         glPushMatrix();
-        glMultMatrixf(object.model_matrix);
+        //TODO find method for glm::mat4
+        //glMultMatrixf(object.model_matrix);
         glDisable(GL_LIGHTING);
         drawAxis(1.0, 0);
         glEnable(GL_LIGHTING);
@@ -91,16 +108,17 @@ void display() {
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
         glBindVertexArray(object.mesh.vertexArrayObjID);
-        glDrawElements(GL_TRIANGLES, object.mesh.indices.size(), GL_UNSIGNED_SHORT, (void *) 0);
+
         glPopMatrix();
     }
 
 
     if(cameraAnimation) { //perform camera animation
-        GLfloat* objectPosition = objects[selected_object].model_matrix;
-        float Px = objectPosition[12];
-        float Py = objectPosition[13];
-        float Pz = objectPosition[14];
+        glm::mat4 objectPosition = objects[selected_object].model_matrix;
+        //TODO check indexing
+        float Px = objectPosition[0][3];
+        float Py = objectPosition[1][3];
+        float Pz = objectPosition[2][3];
         if(motionPortion > 200) { // finish animation
                 cameraAnimation = false;
                 OperationMode = NAVIGATION;
@@ -117,6 +135,8 @@ void display() {
 
 }
 
+#include "objects.cpp"
+
 void init() {
 // Default render settings
     OperationMode = NAVIGATION;
@@ -125,6 +145,13 @@ void init() {
 
     glEnable(GL_LINE_SMOOTH); //enable line antialiasing
     glShadeModel(GL_FLAT); //start with default flat shading
+
+    //Light initialization
+    light.position = {5.0,5.0,-5.0};
+    light.color = {1.0,1.0,1.0};
+    light.power = 1.f;
+
+    //TODO keep fog?
     //FOG Setup for nice background transition
     glEnable(GL_FOG); // enable shader placeholder "fog"
     glFogi(GL_FOG_MODE, GL_LINEAR);  // type of fog
@@ -163,6 +190,17 @@ void init() {
     materials[MaterialType::SLATE].specular = slate_specular;
     materials[MaterialType::SLATE].shiness = slate_shiness;
 
+    materials[MaterialType::NO_MATERIAL].name = "NO_MATERIAL";
+    materials[MaterialType::NO_MATERIAL].ambient = glm::vec3(1,1,1);
+    materials[MaterialType::NO_MATERIAL].diffuse = glm::vec3(0, 0, 0);
+    materials[MaterialType::NO_MATERIAL].specular = glm::vec3(0, 0, 0);
+    materials[MaterialType::NO_MATERIAL].shiness = 1.f;
+
+    // SHADERS configuration section
+    shaders_IDs.resize(NUM_SHADERS);
+    light_uniforms.resize(4); // allocate space for uniforms of PHONG, BLINN and GOURAND + TOON
+    base_uniforms.resize(NUM_SHADERS); // allocate space for uniforms of PHONG,BLINN,GOURAND,TOON,WAVE,TEXTURE_ONLY
+
     // Camera Setup
     viewSetup = {};
     viewSetup.position = glm::vec4(-10.0, 5.0, -10.0, 1.0);
@@ -174,30 +212,14 @@ void init() {
     perspectiveSetup.far_plane = 2000.0f;
     perspectiveSetup.near_plane = 1.0f;
 
-    string objectNames[] = {"cow","horse","sphere"};
-    vector<glm::vec4> startingpositions = {
-            {-5,0,5,0},
-            {20,0,5,0},
-            {0,0,0,0}
-    };
-
-    for (unsigned int i=0; i< size(objectNames); i++) {
-        string objectName = objectNames[i];
-        // Mesh Loading
-        Mesh mesh = {};
-        loadObjFile(MeshDir + objectName + ".obj", &mesh);
-        generate_and_load_buffers(&mesh);
-        // Object Setup
-        Object obj = {};
-        obj.mesh = mesh;
-        obj.material = MaterialType::RED_PLASTIC;
-        obj.name = objectName;
-        glLoadIdentity();
-        selected_object = i;
-        glGetFloatv(GL_MODELVIEW_MATRIX, obj.model_matrix);
-        objects.push_back(obj);
-        modifyModelMatrix(startingpositions[i],glm::vec4(1),0.f,1.0f);
-    }
+    init_sphere_FLAT();
+    init_sphere_SMOOTH();
+    init_textured_plane();
+    init_cube();
+    init_light_object();
+    init_axis();
+    init_grid();
+    init_torus();
 
     // call display directly to show every object in the scene
     display();

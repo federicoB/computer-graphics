@@ -9,6 +9,7 @@
 #define WHEEL_UP 3
 #define WHEEL_DOWN 4
 
+static bool moving_trackball = 0;
 static int last_mouse_pos_Y;
 static int last_mouse_pos_X;
 
