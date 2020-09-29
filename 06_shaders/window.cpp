@@ -29,19 +29,26 @@ void resize(int w, int h) {
     WindowWidth = w;
     WindowHeight = h;
 
-    // applies subsequent matrix operations to the projection matrix stack
+    // Fixed Pipeline matrices for retro compatibility
+    glUseProgram(0); // Embedded openGL shader
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(perspectiveSetup.fovY, perspectiveSetup.aspect, perspectiveSetup.near_plane,
-                   perspectiveSetup.far_plane);
-
-
-    // applies subsequent matrix operations to the modelview matrix stack
+    gluPerspective(perspectiveSetup.fovY, perspectiveSetup.aspect, perspectiveSetup.near_plane, perspectiveSetup.far_plane);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(viewSetup.position.x, viewSetup.position.y, viewSetup.position.z,
               viewSetup.target.x, viewSetup.target.y, viewSetup.target.z,
               viewSetup.upVector.x, viewSetup.upVector.y, viewSetup.upVector.z);
+
+    // Programmable Pipeline matrices for object rendering
+    glm::mat4 P = glm::perspective(perspectiveSetup.fovY, perspectiveSetup.aspect, perspectiveSetup.near_plane, perspectiveSetup.far_plane);
+    glm::mat4 V = glm::lookAt(glm::vec3(viewSetup.position), glm::vec3(viewSetup.target), glm::vec3(viewSetup.upVector));
+
+    for (int i = 0; i < shaders_IDs.size();i++) {
+        glUseProgram(shaders_IDs[i]);
+        glUniformMatrix4fv(base_uniforms[i].P_Matrix_pointer, 1, GL_FALSE, value_ptr(P));
+        glUniformMatrix4fv(base_uniforms[i].V_Matrix_pointer, 1, GL_FALSE, value_ptr(V));
+    }
 }
 
 #include "HUD_Logger.cpp"
@@ -111,49 +118,31 @@ void printToScreen() {
 }
 
 // disegna l'origine del assi
-void drawAxis(float scale, int drawLetters) {
-    glPushMatrix();
-    glScalef(scale, scale, scale);
-    glBegin(GL_LINES);
+void drawAxisAndGrid() {
+    glUseProgram(shaders_IDs[Grid.shading]);
+    glUniformMatrix4fv(base_uniforms[Grid.shading].M_Matrix_pointer, 1, GL_FALSE, value_ptr(Grid.model_matrix));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(Grid.mesh.vertexArrayObjID);
+    glDrawArrays(GL_TRIANGLES, 0, Grid.mesh.vertices.size());
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
 
-    glColor4d(1.0, 0.0, 0.0, 1.0);
-    if (drawLetters) {
-        glVertex3f(.8f, 0.05f, 0.0);
-        glVertex3f(1.0, 0.25f, 0.0); /* Letter X */
-        glVertex3f(0.8f, .25f, 0.0);
-        glVertex3f(1.0, 0.05f, 0.0);
-    }
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(1.0, 0.0, 0.0); /* X axis      */
-
-
-    glColor4d(0.0, 1.0, 0.0, 1.0);
-    if (drawLetters) {
-        glVertex3f(0.10f, 0.8f, 0.0);
-        glVertex3f(0.10f, 0.90f, 0.0); /* Letter Y */
-        glVertex3f(0.10f, 0.90f, 0.0);
-        glVertex3f(0.05, 1.0, 0.0);
-        glVertex3f(0.10f, 0.90f, 0.0);
-        glVertex3f(0.15, 1.0, 0.0);
-    }
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(0.0, 1.0, 0.0); /* Y axis      */
-
-
-    glColor4d(0.0, 0.0, 1.0, 1.0);
-    if (drawLetters) {
-        glVertex3f(0.05f, 0, 0.8f);
-        glVertex3f(0.20f, 0, 0.8f); /* Letter Z*/
-        glVertex3f(0.20f, 0, 0.8f);
-        glVertex3f(0.05, 0, 1.0);
-        glVertex3f(0.05f, 0, 1.0);
-        glVertex3f(0.20, 0, 1.0);
-    }
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(0.0, 0.0, 1.0); /* Z axis    */
-
-    glEnd();
-    glPopMatrix();
+    glUseProgram(shaders_IDs[Axis.shading]);
+    // Caricamento matrice trasformazione del modello
+    glUniformMatrix4fv(base_uniforms[Axis.shading].M_Matrix_pointer, 1, GL_FALSE, value_ptr(Axis.model_matrix));
+    glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
+    glBindTexture(GL_TEXTURE_2D, Axis.textureID);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(Axis.mesh.vertexArrayObjID);
+    glDrawArrays(GL_TRIANGLES, 0, Axis.mesh.vertices.size());
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
 }
 
 // disegna la griglia del piano xz (white)

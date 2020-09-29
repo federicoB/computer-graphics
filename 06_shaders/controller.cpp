@@ -43,6 +43,29 @@ void keyboardDown(unsigned char key, int x, int y) {
         case 'z':
             WorkingAxis = Z;
             break;
+        case 'W': TorusSetup.NumWraps++;
+            compute_Torus(&(objects[TorusSetup.torus_index].mesh));
+            generate_and_load_buffers(false, &(objects[TorusSetup.torus_index].mesh));
+            break;
+        case 'w':
+            if (TorusSetup.NumWraps > 4) {
+                TorusSetup.NumWraps--;
+                compute_Torus(&(objects[TorusSetup.torus_index].mesh));
+                generate_and_load_buffers(false, &(objects[TorusSetup.torus_index].mesh));
+            }
+            break;
+        case 'N':
+            TorusSetup.NumPerWrap++;
+            compute_Torus(&(objects[TorusSetup.torus_index].mesh));
+            generate_and_load_buffers(false, &(objects[TorusSetup.torus_index].mesh));
+            break;
+        case 'n':
+            if (TorusSetup.NumPerWrap > 4) {
+                TorusSetup.NumPerWrap--;
+                compute_Torus(&(objects[TorusSetup.torus_index].mesh));
+                generate_and_load_buffers(false,&(objects[TorusSetup.torus_index].mesh));
+            }
+            break;
         default:
             break;
     }

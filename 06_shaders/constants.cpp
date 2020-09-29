@@ -83,7 +83,7 @@ typedef struct {
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;
-    GLfloat shiness;
+    GLfloat shininess;
 } Material;
 
 typedef enum { // used also as index, don't modify order

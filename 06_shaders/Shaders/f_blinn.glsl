@@ -2,6 +2,9 @@
 // ================
 #version 320 es
 
+// set floating point precision
+precision highp float;
+
 in vec3 E;
 in vec3 N;
 in vec3 L;
