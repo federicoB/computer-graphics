@@ -2,12 +2,9 @@
 // Created by fede on 04/09/20.
 //
 
-//TODO remove smooth/flat shading?
 typedef enum {
     WIRE_FRAME,
     FACE_FILL,
-    FLAT_SHADING,
-    SMOOTH_SHADING,
     CULLING_ON,
     CULLING_OFF,
     CHANGE_TO_WCS,
@@ -17,12 +14,6 @@ typedef enum {
 // gestione delle voci principali del menu
 void main_menu_func(int option) {
     switch (option) {
-        case MenuOption::FLAT_SHADING:
-            glShadeModel(GL_FLAT);
-            break;
-        case MenuOption::SMOOTH_SHADING:
-            glShadeModel(GL_SMOOTH);
-            break;
         case MenuOption::WIRE_FRAME:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             break;
@@ -82,8 +73,6 @@ void buildOpenGLMenu() {
     glutAddMenuEntry("", -1);
     glutAddMenuEntry("Wireframe", MenuOption::WIRE_FRAME);
     glutAddMenuEntry("Face fill", MenuOption::FACE_FILL);
-    glutAddMenuEntry("Smooth Shading", MenuOption::SMOOTH_SHADING);
-    glutAddMenuEntry("Flat Shading", MenuOption::FLAT_SHADING);
     glutAddMenuEntry("Culling: ON", MenuOption::CULLING_ON);
     glutAddMenuEntry("Culling: OFF", MenuOption::CULLING_OFF);
     glutAddSubMenu("Material", materialSubMenu);
