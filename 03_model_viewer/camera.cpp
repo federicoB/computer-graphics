@@ -112,6 +112,5 @@ void create_camera_animation_path() {
     cameraCP[10][2] = viewSetup.position[2];
 
     cameraAnimation = true;
-
     motionPortion = 0;
 }

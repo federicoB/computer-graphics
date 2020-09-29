@@ -2,6 +2,10 @@
 // Created by fede on 04/09/20.
 //
 
+//texture loading utility
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 const string MeshDir = "Mesh/";
 
 // legge un file obj ed inizializza i vector della mesh in input
@@ -171,7 +175,8 @@ void generate_and_load_buffers(bool generate, Mesh *mesh) {
             (void*)0            // array buffer offset
     );
 
-    //TODO check if is necessary to disable vertex
+    // Disable Vertex array to avoid invalid pointers errors
+    // https://stackoverflow.com/questions/12427880/is-it-important-to-call-gldisablevertexattribarray
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);

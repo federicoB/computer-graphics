@@ -8,6 +8,8 @@ static int WindowWidth = 1366;
 static int WindowHeight = 768;
 static GLfloat aspect_ratio = 16.0f / 9.0f;
 
+static Object Axis, Grid;
+
 void init_window(int argc, char **argv) {
 
     // initialize openGL Utility Toolkit

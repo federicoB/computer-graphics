@@ -20,5 +20,5 @@ add_executable(03_model_viewer 03_model_viewer/main_students.cpp)
 target_link_libraries(03_model_viewer ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)
 
 include_directories(06_shaders)
-add_executable(06_shaders 06_shaders/main_students.cpp 06_shaders/common.cpp)
+add_executable(06_shaders 06_shaders/main_students.cpp)
 target_link_libraries(06_shaders ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)

@@ -1,6 +1,8 @@
 //
 // Created by fede on 28/09/20.
 //
+// Contains code for showing specific objects on shene
+//
 
 void init_sphere_FLAT() {
 

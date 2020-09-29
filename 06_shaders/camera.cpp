@@ -115,3 +115,13 @@ void create_camera_animation_path() {
 
     motionPortion = 0;
 }
+
+void camera_animation_step() {
+    if(motionPortion > 200) { // finish animation
+        cameraAnimation = false;
+        OperationMode = NAVIGATION;
+    } else // Move the camera along Bezier curve
+        motionPortion += 1;
+    deCasteljau(cameraCP, motionPortion / 200.0); // scale motionPortion from 0-200 to 0-1
+    glutPostRedisplay();
+}

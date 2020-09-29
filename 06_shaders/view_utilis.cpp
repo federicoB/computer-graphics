@@ -41,3 +41,32 @@ void deCasteljau(float curveCP[][3], float t) {
     for (i = 0; i < 3; i++)
         viewSetup.position[i] = temp[0][i];
 }
+
+/*
+	Crea ed applica la matrice di trasformazione alla matrice dell'oggeto discriminando tra WCS e OCS.
+	La funzione � gia invocata con un input corretto, � sufficiente concludere la sua implementazione.
+*/
+void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, GLfloat angle, GLfloat scale_factor) {
+    glPushMatrix();
+    glLoadIdentity();
+    // Usare glMultMatrix per moltiplicare la matrice attiva in openGL con una propria matrice.
+    // In alternativa si pu� anche usare glm per creare e manipolare le matrici.
+
+    switch (TransformMode) {
+        case WCS:
+            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
+            glScalef(scale_factor, scale_factor, scale_factor);
+            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
+            // multiply for matrix that defines object position / rotation wrt world
+            glMultMatrixf(value_ptr(objects[selected_object].model_matrix));
+            break;
+        case OCS:
+            glMultMatrixf(value_ptr(objects[selected_object].model_matrix));
+            glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
+            glScalef(scale_factor, scale_factor, scale_factor);
+            glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
+            break;
+    }
+    glGetFloatv(GL_MODELVIEW_MATRIX, value_ptr(objects[selected_object].model_matrix));
+    glPopMatrix();
+}
