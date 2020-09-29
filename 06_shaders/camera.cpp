@@ -84,9 +84,9 @@ void create_camera_animation_path() {
     //get object positon
     glm::mat4 objectPosition = objects[selected_object].model_matrix;
     //TODO check indexing
-    float Ox = objectPosition[0][3];
-    float Oy = objectPosition[1][3];
-    float Oz = objectPosition[2][3];
+    float Ox = objectPosition[3][0];
+    float Oy = objectPosition[3][1];
+    float Oz = objectPosition[3][2];
     //get camera position
     float Cx = viewSetup.position[0];
     float Cy = viewSetup.position[1];

@@ -97,10 +97,6 @@ void display() {
 
 
     if(cameraAnimation) { //perform camera animation
-        GLfloat* objectPosition = objects[selected_object].model_matrix;
-        float Px = objectPosition[12];
-        float Py = objectPosition[13];
-        float Pz = objectPosition[14];
         if(motionPortion > 200) { // finish animation
                 cameraAnimation = false;
                 OperationMode = NAVIGATION;

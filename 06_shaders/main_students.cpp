@@ -158,11 +158,6 @@ void display() {
 
 
     if(cameraAnimation) { //perform camera animation
-        glm::mat4 objectPosition = objects[selected_object].model_matrix;
-        //TODO check indexing
-        float Px = objectPosition[0][3];
-        float Py = objectPosition[1][3];
-        float Pz = objectPosition[2][3];
         if(motionPortion > 200) { // finish animation
                 cameraAnimation = false;
                 OperationMode = NAVIGATION;
