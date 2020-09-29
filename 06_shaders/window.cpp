@@ -144,21 +144,3 @@ void drawAxisAndGrid() {
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
 }
-
-// disegna la griglia del piano xz (white)
-void drawGrid(float scale, int dimension) {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glPushMatrix();
-    glScalef(scale, scale, scale);
-    glBegin(GL_LINES);
-    for (int x = -dimension; x < dimension; x++) {
-        glVertex3f(x, 0.0f, -dimension);
-        glVertex3f(x, 0.0f, dimension);
-    }
-    for (int z = -dimension; z < dimension; z++) {
-        glVertex3f(-dimension, 0.0f, z);
-        glVertex3f(dimension, 0.0f, z);
-    }
-    glEnd();
-    glPopMatrix();
-}

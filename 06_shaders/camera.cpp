@@ -83,7 +83,6 @@ float* rotate_point_around_center(float *point, float centerX, float centerZ, do
 void create_camera_animation_path() {
     //get object positon
     glm::mat4 objectPosition = objects[selected_object].model_matrix;
-    //TODO check indexing
     float Ox = objectPosition[3][0];
     float Oy = objectPosition[3][1];
     float Oz = objectPosition[3][2];

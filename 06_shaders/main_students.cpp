@@ -48,19 +48,16 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
             glScalef(scale_factor, scale_factor, scale_factor);
             glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
             // multiply for matrix that defines object position / rotation wrt world
-            //TODO fix with method that support glm::mat4
-            //glMultMatrixf(objects[selected_object].model_matrix);
+            glMultMatrixf(value_ptr(objects[selected_object].model_matrix));
             break;
         case OCS:
-            //TODO fix with method that support glm::mat4
-            //glMultMatrixf(objects[selected_object].model_matrix);
+            glMultMatrixf(value_ptr(objects[selected_object].model_matrix));
             glRotatef(angle, rotation_vector.x, rotation_vector.y, rotation_vector.z);
             glScalef(scale_factor, scale_factor, scale_factor);
             glTranslatef(translation_vector.x, translation_vector.y, translation_vector.z);
             break;
     }
-    //TODO fix with method that support glm::mat4
-    //glGetFloatv(GL_MODELVIEW_MATRIX, objects[selected_object].model_matrix);
+    glGetFloatv(GL_MODELVIEW_MATRIX, value_ptr(objects[selected_object].model_matrix));
     glPopMatrix();
 }
 
@@ -80,9 +77,6 @@ void display() {
     // clear the window and the depth buffer
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    // Draw the central Axis point of reference and the grid
-    drawAxisAndGrid();
-
     //Static scene elements
     // update light position
     glDisable(GL_LIGHTING);
@@ -93,8 +87,8 @@ void display() {
     glColor4d(1, 1, 1, 1);
     glutSolidSphere(0.1, 10, 10); // Light ball
     glPopMatrix();
+    // Draw the central Axis point of reference and the grid
     drawAxisAndGrid(); // The central Axis point of reference
-    drawGrid(10.0, 100); // The horizontal grid
     glEnable(GL_LIGHTING);
 
 
@@ -189,19 +183,6 @@ void init() {
     light.position = {5.0,5.0,-5.0};
     light.color = {1.0,1.0,1.0};
     light.power = 1.f;
-
-    //TODO keep fog?
-    //FOG Setup for nice background transition
-    glEnable(GL_FOG); // enable shader placeholder "fog"
-    glFogi(GL_FOG_MODE, GL_LINEAR);  // type of fog
-    GLfloat fog_color[4] = {0.5, 0.5, 0.5, 1.0};
-    glFogfv(GL_FOG_COLOR, fog_color);
-    glFogf(GL_FOG_START, 50.0f);
-    glFogf(GL_FOG_END, 500.0f);
-    // Light Setup
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0); //enable light 0 in the evaluation of the lighting equation
-
 
     // Materials setup
     materials.resize(5);
