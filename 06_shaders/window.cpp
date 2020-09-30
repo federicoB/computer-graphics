@@ -62,6 +62,8 @@ void printToScreen() {
     string obj = "Oggetto: " + objects[selected_object].name;
     string ref = "Sistema WCS/OCS: ";
     string mat = "Materiale: " + materials[objects[selected_object].material].name;
+    string shader = "Shader: " + shaders_names[objects[selected_object].shading];
+    string texture = "Texture " + texture_names[objects[selected_object].textureID];
     switch (WorkingAxis) {
         case X:
             axis += "X";
@@ -96,11 +98,14 @@ void printToScreen() {
             break;
     }
     vector<string> lines;
+    lines.push_back(texture);
+    lines.push_back(shader);
     lines.push_back(mat);
     lines.push_back(obj);
     lines.push_back(axis);
     lines.push_back(mode);
     lines.push_back(ref);
+
 
 
     glMatrixMode(GL_PROJECTION);
@@ -136,7 +141,7 @@ void drawAxisAndGrid() {
     // Caricamento matrice trasformazione del modello
     glUniformMatrix4fv(base_uniforms[Axis.shading].M_Matrix_pointer, 1, GL_FALSE, value_ptr(Axis.model_matrix));
     glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
-    glBindTexture(GL_TEXTURE_2D, Axis.textureID);
+    glBindTexture(GL_TEXTURE_2D, textures[Axis.textureID]);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);

@@ -19,7 +19,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define NUM_SHADERS 7
+#define NUM_SHADERS 8
 
 using namespace std;
 
@@ -92,15 +92,27 @@ typedef enum { // used also as index, don't modify order
     BLINN,
     TOON,
     TEXTURE_ONLY,
+    TEXTURE_PHONG,
     PASS_THROUGH,
     WAVE
 } ShadingType;
+
+string shaders_names[] = {
+        "GOURAUD",
+        "PHONG",
+        "BLINN",
+        "TOON",
+        "TEXTURE_ONLY",
+        "TEXTURE_PHONG",
+        "PASS_THROUGH",
+        "WAVE"
+};
 
 typedef struct {
     Mesh mesh;
     MaterialType material;
     ShadingType shading;
-    GLuint textureID;
+    int textureID;
     glm::mat4 model_matrix;
     string name;
 } Object;
@@ -124,16 +136,6 @@ typedef struct {
 
 const string TextureDir = "Textures/";
 const string ShaderDir = "Shaders/";
-
-struct {
-    // Variables controlling the torus mesh resolution
-    int NumWraps = 10;
-    int NumPerWrap = 8;
-    // Variables controlling the size of the torus
-    float MajorRadius = 3.0;
-    float MinorRadius = 1.0;
-    int torus_index;
-} TorusSetup;
 
 using namespace std;
 

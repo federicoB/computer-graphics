@@ -2,9 +2,7 @@
 // Created by fede on 04/09/20.
 //
 
-//texture loading utility
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+
 
 const string MeshDir = "Mesh/";
 
@@ -114,8 +112,6 @@ void loadObjFile(string file_path, Mesh *mesh) {
 }
 
 
-//TODO extract buffer generation and call it only where necessary
-// Genera i buffer per la mesh in input e ne salva i puntatori di openGL
 /**
  *
  * @param generate bool: if it is necessary to pre-generate
@@ -182,38 +178,3 @@ void generate_and_load_buffers(bool generate, Mesh *mesh) {
     glDisableVertexAttribArray(2);
 }
 
-GLuint loadTexture(string path)
-{
-    int width, height, texChannels;
-    GLuint textureID;
-    stbi_uc* pixels = stbi_load(path.data(), &width, &height, &texChannels, STBI_rgb_alpha);
-    if (!pixels) {
-        std::cerr << "\nFailed to load texture image! --> " << path << std::endl;
-        std::getchar();
-        exit(EXIT_FAILURE);
-    }
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    //Texture displacement logic
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //Texture sampling logic
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // data loading in memory
-    glTexImage2D(GL_TEXTURE_2D,  //the target
-                 0, // the mip map level we want to generate
-                 GL_RGBA,
-                 width,
-                 height,
-                 0, // border, leave 0
-                 GL_RGBA, // we assume is a RGB color image with 24 bit depth per pixel
-                 GL_UNSIGNED_BYTE, // the data type
-                 pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);// automatic mip maps generation
-
-    stbi_image_free(pixels);
-    return textureID;
-}

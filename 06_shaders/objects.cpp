@@ -4,6 +4,16 @@
 // Contains code for showing specific objects on shene
 //
 
+struct {
+    // Variables controlling the torus mesh resolution
+    int NumWraps = 10;
+    int NumPerWrap = 8;
+    // Variables controlling the size of the torus
+    float MajorRadius = 3.0;
+    float MinorRadius = 1.0;
+    int torus_index;
+} TorusSetup;
+
 void init_sphere_FLAT() {
 
     Mesh sphereF = {};
@@ -14,6 +24,7 @@ void init_sphere_FLAT() {
     obj3.mesh = sphereF;
     obj3.material = MaterialType::EMERALD;
     obj3.shading = ShadingType::GOURAUD;
+    obj3.textureID = 4;
     obj3.name = "Sphere FLAT";
     obj3.model_matrix = glm::translate(glm::mat4(1), glm::vec3(3., 0., -6.));
     objects.push_back(obj3);
@@ -28,6 +39,7 @@ void init_sphere_SMOOTH() {
     obj4.mesh = sphereS;
     obj4.material = MaterialType::RED_PLASTIC;
     obj4.shading = ShadingType::BLINN;
+    obj4.textureID = 4;
     obj4.name = "Sphere SMOOTH";
     obj4.model_matrix = glm::translate(glm::mat4(1), glm::vec3(6., 0., -3.));
     objects.push_back(obj4);
@@ -45,40 +57,11 @@ void init_textured_plane() {
     generate_and_load_buffers(true, &surface);
     Object obj0 = {};
     obj0.mesh = surface;
-    obj0.material = MaterialType::NO_MATERIAL;
+    obj0.material = MaterialType::RED_PLASTIC;
     obj0.shading = ShadingType::TEXTURE_ONLY;
-
-    /////////////////////////////////////////////////////////////////////////
-    //  Compute checkboard procedural_texture image of dimension width x width x 3 (RGB)
-    /////////////////////////////////////////////////////////////////////////
-    GLubyte image[64][64][3];
-    int i, j, c;
-    for (i = 0; i < 64; i++) {
-        for (j = 0; j < 64; j++) {
-            c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
-            image[i][j][0] = (GLubyte)c;
-            image[i][j][1] = (GLubyte)c;
-            image[i][j][2] = (GLubyte)c;
-        }
-    }
-    /////////////////////////////////////////
-    glGenTextures(1, &obj0.textureID);
-    glBindTexture(GL_TEXTURE_2D, obj0.textureID);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D,  //the target
-                 0, // the mip map level we want to generate
-                 GL_RGB, // the format of the texture
-                 64, //texture_size, width
-                 64, //texture_size, heigth
-                 0,  // border, leave 0
-                 GL_RGB, // we assume is a RGB color image with 24 bit depth per pixel
-                 GL_UNSIGNED_BYTE, // the data type
-                 image);
+    obj0.textureID = 5;
     obj0.name = "Plane";
-    obj0.model_matrix = glm::translate(glm::mat4(1), glm::vec3(-5., 0., -5.));
+    obj0.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0.,-1, 0));
     objects.push_back(obj0);
 }
 
@@ -91,7 +74,7 @@ void init_cube() {
     obj1.mesh = cube;
     obj1.material = MaterialType::NO_MATERIAL;
     obj1.shading = ShadingType::TEXTURE_ONLY;
-    obj1.textureID = loadTexture(TextureDir + "cube_tex.jpg");
+    obj1.textureID = 2; //cube
     obj1.name = "Textured Cube";
     obj1.model_matrix = glm::translate(glm::mat4(1), glm::vec3(-5., 0., 5.));
     objects.push_back(obj1);
@@ -105,6 +88,7 @@ void init_light_object() {
     obj.mesh = sphereS;
     obj.material = MaterialType::NO_MATERIAL;
     obj.shading = ShadingType::PASS_THROUGH;
+    obj.textureID = 4;
     obj.name = "light";
     obj.model_matrix = glm::scale(glm::translate(glm::mat4(1), light.position), glm::vec3(0.2, 0.2, 0.2));
     objects.push_back(obj);
@@ -118,7 +102,7 @@ void init_axis() {
     obj1.mesh = _grid;
     obj1.material = MaterialType::NO_MATERIAL;
     obj1.shading = ShadingType::TEXTURE_ONLY;
-    obj1.textureID = loadTexture(TextureDir + "AXIS_TEX.png");
+    obj1.textureID = 0;
     obj1.name = "axis";
     obj1.model_matrix = glm::scale(glm::mat4(1),glm::vec3(2.f,2.f,2.f));
     Axis = obj1;
@@ -132,6 +116,7 @@ void init_grid() {
     obj1.mesh = _grid;
     obj1.material = MaterialType::NO_MATERIAL;
     obj1.shading = ShadingType::PASS_THROUGH;
+    obj1.textureID = 6;
     obj1.name = "grid";
     obj1.model_matrix = glm::scale(glm::mat4(1), glm::vec3(2.f, 2.f, 2.f));
     Grid = obj1;
@@ -156,7 +141,8 @@ void computeTorusVertex(int i, int j, Mesh* mesh) {
 
     mesh->vertices.push_back(glm::vec3(x, y, z));
     mesh->normals.push_back(glm::vec3(sintheta*cosphi, sinphi, costheta*cosphi));
-    mesh->texCoords.push_back(glm::vec2(0));
+    // texture coordinates
+    mesh->texCoords.push_back(glm::vec2(j / (float)TorusSetup.NumPerWrap, i / (float)TorusSetup.NumWraps));
 }
 
 void compute_Torus(Mesh* mesh)
@@ -192,8 +178,9 @@ void init_torus() {
     Object obj2 = {};
     obj2.mesh = torus;
     obj2.material = MaterialType::BRASS;
-    obj2.shading = ShadingType::BLINN; // GOURAUD;
+    obj2.shading = ShadingType::TEXTURE_ONLY; // GOURAUD;
     obj2.name = "Torus";
+    obj2.textureID = 5;
     obj2.model_matrix = glm::translate(glm::mat4(1), glm::vec3(5., 0., 5.));
     objects.push_back(obj2);
     TorusSetup.torus_index = objects.size() - 1;

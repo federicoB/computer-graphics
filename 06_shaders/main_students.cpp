@@ -23,6 +23,7 @@ based on the OpenGL Shading Language (GLSL) specifications.
 #include "constants.cpp"
 vector<GLuint> shaders_IDs; //Pointers to the shader programs
 #include "HUD_Logger.cpp"
+#include "textures.cpp"
 #include "display_object.cpp"
 #include "camera.cpp"
 #include "window.cpp"
@@ -42,8 +43,13 @@ void display() {
     // clear the window and the depth buffer
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+    //update light position
+    light.position.x = objects[0].model_matrix[3][0];
+    light.position.y = objects[0].model_matrix[3][1];
+    light.position.z = objects[0].model_matrix[3][2];
+
     // Draw the central Axis point of reference and the grid
-    drawAxisAndGrid(); 
+    drawAxisAndGrid();
 
     for (Object object : objects) {
         display_object(object);
@@ -71,15 +77,10 @@ void init() {
 
     glEnable(GL_LINE_SMOOTH); //enable line antialiasing
     glShadeModel(GL_FLAT); //start with default flat shading
-
-    //Light initialization
-    light.position = {5.0,5.0,-5.0};
+    texture_setup();
+    init_light_object();
     light.color = {1.0,1.0,1.0};
     light.power = 1.f;
-
-    material_setup();
-
-    shaders_setup();
 
     // Camera Setup
     viewSetup = {};
@@ -96,10 +97,13 @@ void init() {
     init_sphere_SMOOTH();
     init_textured_plane();
     init_cube();
-    init_light_object();
     init_axis();
     init_grid();
     init_torus();
+
+    material_setup();
+
+    shaders_setup();
 
     // call display directly to show every object in the scene
     display();

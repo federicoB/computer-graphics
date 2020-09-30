@@ -21,4 +21,5 @@ target_link_libraries(03_model_viewer ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GL
 
 include_directories(06_shaders)
 add_executable(06_shaders 06_shaders/main_students.cpp)
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fpermissive")
 target_link_libraries(06_shaders ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)

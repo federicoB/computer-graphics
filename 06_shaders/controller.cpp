@@ -66,6 +66,16 @@ void keyboardDown(unsigned char key, int x, int y) {
                 generate_and_load_buffers(false,&(objects[TorusSetup.torus_index].mesh));
             }
             break;
+        case 'm':
+            objects[selected_object].shading = objects[selected_object].shading==GOURAUD ? (ShadingType) WAVE : (ShadingType) objects[selected_object].shading-1;
+            break;
+        case 't':
+            objects[selected_object].textureID = objects[selected_object].textureID == N_TEXTURE-1 ? 0 : objects[selected_object].textureID+1;
+            break;
+        case 'f':
+            free(textures_data[5].pixels);
+            textures_data[5] = gen_fractal_texture();
+            break;
         default:
             break;
     }
