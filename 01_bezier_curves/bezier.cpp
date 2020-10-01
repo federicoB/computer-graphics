@@ -172,14 +172,14 @@ void addNewPoint(float x, float y) {
  * @param t - evaluates the curve in t (range 0-1)
  * @param ret - returned point
  */
-void lerp(std::array<float,3> p1, std::array<float,3> p2, float t, std::array<float,3> &ret) {
+void lerp(std::array<float, 3> p1, std::array<float, 3> p2, float t, std::array<float, 3> &ret) {
     ret[0] = ((1 - t) * p1[0]) + (t * p2[0]);
     ret[1] = ((1 - t) * p1[1]) + (t * p2[1]);
     ret[2] = ((1 - t) * p1[2]) + (t * p2[2]);
 }
 
 void deCasteljau(float t) {
-    std::array<float,3> temp[controlPoints.size()];
+    std::array<float, 3> temp[controlPoints.size()];
     int i;
 
     for (i = 0; i < controlPoints.size(); i++) {
@@ -196,14 +196,15 @@ void deCasteljau(float t) {
     }
     glVertex3f(temp[0][0], temp[0][1], temp[0][2]);
 }
-    /*
- * Calculate the distance between points
- * @param p1 - point 1
- * @param p2 - point 2
- */
+
+/*
+* Calculate the distance between points
+* @param p1 - point 1
+* @param p2 - point 2
+*/
 float point2pointDistance(std::array<float, 3> p1, std::array<float, 3> p2) {
-        return sqrtf(powf(p1[0] - p2[0], 2) + powf(p1[1] - p2[1], 2));
-    }
+    return sqrtf(powf(p1[0] - p2[0], 2) + powf(p1[1] - p2[1], 2));
+}
 
 /*
  * Evaulate the distance of a point from a line
@@ -222,154 +223,154 @@ float point2LineDistance(std::array<float, 3> p0, std::array<float, 3> p1, std::
  * @param cps - curve control points
  * @param tolerance - degree of smoothness
  */
-    void adaptiveSubdivision(std::array<float, 3> controlPoints[], unsigned long numCP, float tolerance) {
-        int i, j;
-        std::array<float,3> temp[numCP];
-        std::array<float,3> curve1[numCP];
-        std::array<float,3> curve2[numCP];
-        bool canApproxLine = true;
+void adaptiveSubdivision(std::array<float, 3> controlPoints[], unsigned long numCP, float tolerance) {
+    int i, j;
+    std::array<float, 3> temp[numCP];
+    std::array<float, 3> curve1[numCP];
+    std::array<float, 3> curve2[numCP];
+    bool canApproxLine = true;
 
-        // check if tolerance is reached and line can be approximated
+    // check if tolerance is reached and line can be approximated
 
-        // Calculates the distance of every control point from the line between
-        // the first control point and the last control point
-        for (i = 1; i < numCP - 1; i++) {
-            if (point2LineDistance(controlPoints[i], controlPoints[0], controlPoints[numCP - 1]) > tolerance) {
-                canApproxLine = false;
-            }
+    // Calculates the distance of every control point from the line between
+    // the first control point and the last control point
+    for (i = 1; i < numCP - 1; i++) {
+        if (point2LineDistance(controlPoints[i], controlPoints[0], controlPoints[numCP - 1]) > tolerance) {
+            canApproxLine = false;
         }
-
-        // Draw the line if it can be approximated
-        if (canApproxLine) {
-            glVertex3f(controlPoints[0][0], controlPoints[0][1], controlPoints[0][2]);
-            glVertex3f(controlPoints[numCP - 1][0], controlPoints[numCP - 1][1], controlPoints[numCP - 1][2]);
-        } else {
-
-            //copy every control point in temp
-            for (i = 0; i < numCP; i++) {
-                temp[i] = controlPoints[i];
-                curve1[i] = controlPoints[i];
-                curve2[i] = controlPoints[i];
-            }
-
-            // curve 1 has first control point
-            curve1[0] = temp[0];
-
-            // curve 2 has last control point
-            curve2[numCP - 1] = temp[numCP - 1];
-
-            // Otherwise evaluate the point in 0.5 (subdivision)
-            for (i = 1; i < numCP; i++) {
-                for (j = 0; j < numCP - i; j++) {
-                    lerp(temp[j], temp[j + 1], 0.5f, temp[j]);
-                }
-                curve1[i] = temp[0];
-                curve2[numCP - i - 1] = temp[numCP - i - 1];
-            }
-
-            // Recursive call on the 2 sub curves
-            adaptiveSubdivision(curve1, numCP, tolerance);
-            adaptiveSubdivision(curve2, numCP, tolerance);
-        }
-
     }
 
-    void display(void) {
-        int i;
+    // Draw the line if it can be approximated
+    if (canApproxLine) {
+        glVertex3f(controlPoints[0][0], controlPoints[0][1], controlPoints[0][2]);
+        glVertex3f(controlPoints[numCP - 1][0], controlPoints[numCP - 1][1], controlPoints[numCP - 1][2]);
+    } else {
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        glLineWidth(2);
-
-        // Draw the straight line segments between control points
-        if (controlPoints.size() > 1) {
-            glColor3f(0.968, 0.113, 0.113);            // Reddish/purple lines
-            // define evaluator
-            glMap1f(GL_MAP1_VERTEX_3, // type of data generated
-                    0.0, 1.0, // evaluate between this 2 points
-                    3, // stride
-                    controlPoints.size(),  // curve order
-                    &controlPoints[0][0]); //pointer to array of control points
-            glBegin(GL_LINE_STRIP);
-            for (i = 0; i < controlPoints.size(); i++) {
-                glVertex2f(controlPoints[i][0], controlPoints[i][1]);
-            }
-            glEnd();
-
-            // draw curve
-            glColor3f(0.270, 0.968, 0.113);            // Green lines
-            glBegin(GL_LINE_STRIP);
-            std::array<float,3> cPArray[controlPoints.size()];
-            std::copy(controlPoints.begin(),controlPoints.end(),cPArray);
-            adaptiveSubdivision(cPArray,controlPoints.size(),0.00005f);
-            // for (i = 0; i < 100; i = i + 2) {
-            //    deCasteljau((float) i / 100);
-            // }
-            glEnd();
+        //copy every control point in temp
+        for (i = 0; i < numCP; i++) {
+            temp[i] = controlPoints[i];
+            curve1[i] = controlPoints[i];
+            curve2[i] = controlPoints[i];
         }
 
-        // Draw the interpolated points second.
-        glColor3f(0.0f, 0.0f, 0.0f);            // Draw points in black
-        glBegin(GL_POINTS);
-        //TODO scale points
+        // curve 1 has first control point
+        curve1[0] = temp[0];
+
+        // curve 2 has last control point
+        curve2[numCP - 1] = temp[numCP - 1];
+
+        // Otherwise evaluate the point in 0.5 (subdivision)
+        for (i = 1; i < numCP; i++) {
+            for (j = 0; j < numCP - i; j++) {
+                lerp(temp[j], temp[j + 1], 0.5f, temp[j]);
+            }
+            curve1[i] = temp[0];
+            curve2[numCP - i - 1] = temp[numCP - i - 1];
+        }
+
+        // Recursive call on the 2 sub curves
+        adaptiveSubdivision(curve1, numCP, tolerance);
+        adaptiveSubdivision(curve2, numCP, tolerance);
+    }
+
+}
+
+void display(void) {
+    int i;
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glLineWidth(2);
+
+    // Draw the straight line segments between control points
+    if (controlPoints.size() > 1) {
+        glColor3f(0.968, 0.113, 0.113);            // Reddish/purple lines
+        // define evaluator
+        glMap1f(GL_MAP1_VERTEX_3, // type of data generated
+                0.0, 1.0, // evaluate between this 2 points
+                3, // stride
+                controlPoints.size(),  // curve order
+                &controlPoints[0][0]); //pointer to array of control points
+        glBegin(GL_LINE_STRIP);
         for (i = 0; i < controlPoints.size(); i++) {
             glVertex2f(controlPoints[i][0], controlPoints[i][1]);
         }
         glEnd();
 
-        glFlush();
+        // draw curve
+        glColor3f(0.270, 0.968, 0.113);            // Green lines
+        glBegin(GL_LINE_STRIP);
+        std::array<float, 3> cPArray[controlPoints.size()];
+        std::copy(controlPoints.begin(), controlPoints.end(), cPArray);
+        adaptiveSubdivision(cPArray, controlPoints.size(), 0.00005f);
+        // for (i = 0; i < 100; i = i + 2) {
+        //    deCasteljau((float) i / 100);
+        // }
+        glEnd();
     }
 
-    void initRendering() {
-        //white background color
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        // set point size
-        glPointSize(15);
-
-
-        // The following commands should induce OpenGL to create round points and
-        //	antialias points and lines.  (This is implementation dependent unfortunately, and
-        //  may slow down rendering considerably.)
-        //  You may comment these out if you wish.
-        glEnable(GL_POINT_SMOOTH); //enable point antialiasing
-        glEnable(GL_LINE_SMOOTH); //enable line antialisiasing
-        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);    // Make round points, not square points
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);        // Antialias the lines
-        glEnable(GL_MAP1_VERTEX_3); //enable opengl bezier evaluator
-        glEnable(GL_BLEND); //enable object blending
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //set blending formula
+    // Draw the interpolated points second.
+    glColor3f(0.0f, 0.0f, 0.0f);            // Draw points in black
+    glBegin(GL_POINTS);
+    //TODO scale points
+    for (i = 0; i < controlPoints.size(); i++) {
+        glVertex2f(controlPoints[i][0], controlPoints[i][1]);
     }
+    glEnd();
 
-    void resizeWindow(int new_width, int new_heigth) {
-        WindowHeight = (new_heigth > 1) ? new_heigth : 2;
-        WindowWidth = (new_width > 1) ? new_width : 2;
-        // change viewport
-        glViewport(0, 0, (GLsizei) new_width, (GLsizei) new_heigth);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluOrtho2D(0.0f, 1.0f, 0.0f, 1.0f);  // Always view [0,1]x[0,1].
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-    }
+    glFlush();
+}
 
-    int main(int argc, char **argv) {
+void initRendering() {
+    //white background color
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        glutInit(&argc, argv);
-        // double buffering buffer and rgb color support
-        glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-        glutInitWindowSize(500, 500);
-        glutInitWindowPosition(100, 100);
-        glutCreateWindow("Assignment 1 - bezier curves");
+    // set point size
+    glPointSize(15);
 
-        initRendering();
 
-        glutDisplayFunc(display);
-        glutReshapeFunc(resizeWindow);
-        glutKeyboardFunc(keyboard_handler);
-        glutMouseFunc(mouseHandler);
-        glutMotionFunc(mousemove); // detects mouse move while dragging
-        //glutPassiveMotionFunc(passiveMouse)
-        glutMainLoop();
+    // The following commands should induce OpenGL to create round points and
+    //	antialias points and lines.  (This is implementation dependent unfortunately, and
+    //  may slow down rendering considerably.)
+    //  You may comment these out if you wish.
+    glEnable(GL_POINT_SMOOTH); //enable point antialiasing
+    glEnable(GL_LINE_SMOOTH); //enable line antialisiasing
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);    // Make round points, not square points
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);        // Antialias the lines
+    glEnable(GL_MAP1_VERTEX_3); //enable opengl bezier evaluator
+    glEnable(GL_BLEND); //enable object blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //set blending formula
+}
 
-        return 0;                    // This line is never reached
-    }
+void resizeWindow(int new_width, int new_heigth) {
+    WindowHeight = (new_heigth > 1) ? new_heigth : 2;
+    WindowWidth = (new_width > 1) ? new_width : 2;
+    // change viewport
+    glViewport(0, 0, (GLsizei) new_width, (GLsizei) new_heigth);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0.0f, 1.0f, 0.0f, 1.0f);  // Always view [0,1]x[0,1].
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+int main(int argc, char **argv) {
+
+    glutInit(&argc, argv);
+    // double buffering buffer and rgb color support
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("Assignment 1 - bezier curves");
+
+    initRendering();
+
+    glutDisplayFunc(display);
+    glutReshapeFunc(resizeWindow);
+    glutKeyboardFunc(keyboard_handler);
+    glutMouseFunc(mouseHandler);
+    glutMotionFunc(mousemove); // detects mouse move while dragging
+    //glutPassiveMotionFunc(passiveMouse)
+    glutMainLoop();
+
+    return 0;                    // This line is never reached
+}
