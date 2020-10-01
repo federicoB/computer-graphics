@@ -141,7 +141,7 @@ void drawAxisAndGrid() {
     // Caricamento matrice trasformazione del modello
     glUniformMatrix4fv(base_uniforms[Axis.shading].M_Matrix_pointer, 1, GL_FALSE, value_ptr(Axis.model_matrix));
     glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
-    glBindTexture(GL_TEXTURE_2D, textures[Axis.textureID]);
+    glBindTexture(GL_TEXTURE_2D, textures_data[Axis.textureID].allocatedID);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);

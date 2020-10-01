@@ -74,7 +74,9 @@ void keyboardDown(unsigned char key, int x, int y) {
             break;
         case 'f':
             free(textures_data[5].pixels);
+            glDeleteTextures(1,&textures_data[5].allocatedID);
             textures_data[5] = gen_fractal_texture();
+            textures_data[5].allocatedID = loadTexture(textures_data[5]);
             break;
         default:
             break;

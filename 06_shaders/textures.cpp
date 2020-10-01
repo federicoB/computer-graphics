@@ -9,12 +9,9 @@ string texture_names[] = {
         "cube",
         "bombolone",
         "wood",
-        "procedural_chess",
+        "fractal",
         "no_texture"
 };
-
-
-GLuint textures[7];
 
 
 //texture loading utility
@@ -23,6 +20,7 @@ GLuint textures[7];
 
 typedef struct  {
     stbi_uc* pixels;
+    GLuint allocatedID;
     int width;
     int height;
 } Texture_data;
@@ -130,4 +128,10 @@ void texture_setup() {
     textures_data[3] = load_texture_data(TextureDir + "bombolone_2.jpg");
     textures_data[4] = load_texture_data(TextureDir + "WoodGrain.bmp");
     textures_data[5] = gen_fractal_texture();
+    textures_data[0].allocatedID = loadTexture(textures_data[0]);
+    textures_data[1].allocatedID = loadTexture(textures_data[1]);
+    textures_data[2].allocatedID = loadTexture(textures_data[2]);
+    textures_data[3].allocatedID = loadTexture(textures_data[3]);
+    textures_data[4].allocatedID = loadTexture(textures_data[4]);
+    textures_data[5].allocatedID = loadTexture(textures_data[5]);
 }

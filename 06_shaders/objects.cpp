@@ -15,7 +15,6 @@ struct {
 } TorusSetup;
 
 void init_sphere_FLAT() {
-
     Mesh sphereF = {};
     loadObjFile(MeshDir + "sphere_n_t_flat.obj", &sphereF);
     generate_and_load_buffers(true, &sphereF);
@@ -47,7 +46,6 @@ void init_sphere_SMOOTH() {
 
 //Textured plane (2 triangles) with a procedural texture but no material, use a texture-only shader
 void init_textured_plane() {
-
     Mesh surface = {};
     surface.vertices = { {-2,0,-2}, {-2,0,2}, {2,0,2}, {2,0,-2}, {-2,0,-2}, {2,0,2} };
     surface.normals = { {0,1,0}, {0,1,0}, {0,1,0}, {0,1,0}, {0,1,0}, {0,1,0} };
@@ -66,7 +64,6 @@ void init_textured_plane() {
 }
 
 void init_cube() {
-
     Mesh cube = {};
     loadObjFile(MeshDir + "cube_n_t_flat.obj", &cube);
     generate_and_load_buffers(true, &cube);
@@ -90,7 +87,7 @@ void init_light_object() {
     obj.shading = ShadingType::PASS_THROUGH;
     obj.textureID = 4;
     obj.name = "light";
-    obj.model_matrix = glm::scale(glm::translate(glm::mat4(1), light.position), glm::vec3(0.2, 0.2, 0.2));
+    obj.model_matrix = glm::scale(glm::translate(glm::mat4(1), glm::vec3(-3., 6., -3.)), glm::vec3(0.2, 0.2, 0.2));
     objects.push_back(obj);
 }
 

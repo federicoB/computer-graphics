@@ -29,8 +29,8 @@ void display_object(Object object) {
             // Caricamento matrice trasformazione del modello
             glUniformMatrix4fv(base_uniforms[TEXTURE_PHONG].M_Matrix_pointer, 1, GL_FALSE, value_ptr(object.model_matrix));
             glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-            glBindTexture(GL_TEXTURE_2D, loadTexture(textures_data[object.textureID]));
+            glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
+            glBindTexture(GL_TEXTURE_2D, textures_data[object.textureID].allocatedID);
             //Material loading
             glUniform3f(light_uniforms[TEXTURE_PHONG].light_position_pointer, light.position.x, light.position.y, light.position.z); // Added light update
             glUniform3fv(light_uniforms[TEXTURE_PHONG].material_ambient, 1, glm::value_ptr(materials[object.material].ambient));
@@ -49,8 +49,7 @@ void display_object(Object object) {
             glUniform3fv(light_uniforms[WAVE].material_specular, 1, glm::value_ptr(materials[object.material].specular));
             glUniform1f(light_uniforms[WAVE].material_shininess, materials[object.material].shininess);
             glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
-            glBindTexture(GL_TEXTURE_2D, textures[object.textureID]);
-            glUniform1f(time_now, (float) glutGet(GLUT_ELAPSED_TIME));
+            glBindTexture(GL_TEXTURE_2D, textures_data[object.textureID].allocatedID);
             // there is a wave object in the shane call redisplay
             glutPostRedisplay();
             break;
@@ -59,7 +58,7 @@ void display_object(Object object) {
             // Caricamento matrice trasformazione del modello
             glUniformMatrix4fv(base_uniforms[TEXTURE_ONLY].M_Matrix_pointer, 1, GL_FALSE, value_ptr(object.model_matrix));
             glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
-            glBindTexture(GL_TEXTURE_2D, loadTexture(textures_data[object.textureID]));
+            glBindTexture(GL_TEXTURE_2D, textures_data[object.textureID].allocatedID);
             break;
         case ShadingType::PASS_THROUGH:
             glUseProgram(shaders_IDs[PASS_THROUGH]);
