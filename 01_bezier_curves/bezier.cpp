@@ -45,6 +45,8 @@ void keyboard_handler(unsigned char key, int x, int y) {
             break;
         case 27:            // Escape key
             exit(0);
+        default:
+            break;
     }
 }
 
@@ -80,7 +82,7 @@ int getPointInRange(float x, float y) {
             std::array<float, 3> controlPoint = controlPoints[i];
             // euclidean distance
             distance = sqrt(pow(x - controlPoint[0], 2.0) + pow(y - controlPoint[1], 2.0));
-            // if the distance is accettable and lower than current lowest distance
+            // if the distance is acceptable and lower than current lowest distance
             if (distance <= max_distance && distance <= lowestDistance) {
                 near = i;
                 lowestDistance = distance;
@@ -207,7 +209,7 @@ float point2pointDistance(std::array<float, 3> p1, std::array<float, 3> p2) {
 }
 
 /*
- * Evaulate the distance of a point from a line
+ * Evaluate the distance of a point from a line
  * @param p0 - point
  * @param p1, p2 - extremity of segment
  */
@@ -275,7 +277,7 @@ void adaptiveSubdivision(std::array<float, 3> controlPoints[], unsigned long num
 
 }
 
-void display(void) {
+void display() {
     int i;
 
     glClear(GL_COLOR_BUFFER_BIT);
