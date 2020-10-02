@@ -91,7 +91,7 @@ void display() {
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
         glBindVertexArray(object.mesh.vertexArrayObjID);
-        glDrawElements(GL_TRIANGLES, object.mesh.indices.size(), GL_UNSIGNED_SHORT, (void *) 0);
+        glDrawElements(GL_TRIANGLES, object.mesh.indices.size(), GL_UNSIGNED_SHORT, (void *) nullptr);
         glPopMatrix();
     }
 
@@ -102,7 +102,7 @@ void display() {
                 OperationMode = NAVIGATION;
         } else // Move the camera along Bezier curve
             motionPortion += 1;
-            deCasteljau(cameraCP, motionPortion / 200.0); // scale motionPortion from 0-200 to 0-1
+            deCasteljau(cameraCP, static_cast<float>(motionPortion / 200.0)); // scale motionPortion from 0-200 to 0-1
         glutPostRedisplay();
     }
 
