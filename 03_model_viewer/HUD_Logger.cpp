@@ -32,8 +32,7 @@ void stroke_char_output(int x, int y, int z, std::string s, void * font)
 		glutStrokeCharacter(font, s[i]);
 }
 
-HUD_Logger::HUD_Logger() {
-}
+HUD_Logger::HUD_Logger() = default;
 
 HUD_Logger* HUD_Logger::get()
 {

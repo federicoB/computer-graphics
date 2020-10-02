@@ -88,7 +88,6 @@ void create_camera_animation_path() {
     float Oz = objectPosition[3][2];
     //get camera position
     float Cx = viewSetup.position[0];
-    float Cy = viewSetup.position[1];
     float Cz = viewSetup.position[2];
     viewSetup.target = glm::vec4(Ox,Oy,Oz,0);     //make camera point to object
 
