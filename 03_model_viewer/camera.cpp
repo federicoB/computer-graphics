@@ -34,7 +34,7 @@ void zoom(float dir) {
     float t = 0.1f * dir;
 
     //loop over vector components
-    for (float &i : v) {
+    for (int i=0; i<3; i++) {
         v[i] = viewSetup.target[i] - viewSetup.position[i]; // v = vector from camera to focused point
         i *= t; // tv = multiply vector by direction
         viewSetup.position[i] += v[i]; // P1 = camera position + vector to origin multiplied by some value
