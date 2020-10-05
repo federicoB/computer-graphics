@@ -134,8 +134,8 @@ typedef struct {
 } BaseShaderUniform;
 
 
-const string TextureDir = "Textures/";
-const string ShaderDir = "Shaders/";
+const string TextureDir = "06_shaders/Textures/";
+const string ShaderDir = "06_shaders/Shaders/";
 
 using namespace std;
 

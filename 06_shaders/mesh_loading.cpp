@@ -4,7 +4,7 @@
 
 
 
-const string MeshDir = "Mesh/";
+const string MeshDir = "06_shaders/Mesh/";
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {
