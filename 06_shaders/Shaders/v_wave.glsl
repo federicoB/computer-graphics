@@ -27,7 +27,7 @@ uniform float time;
 uniform PointLight light;
 
 void main() {
-    float freq = 0.001, amp = 0.1;
+    float freq = 0.001, amp = 0.5;
     vec4 pos = vec4(aPos, 1.0);
 
     // 3d wave using sin(x) and sin(z)

@@ -50,7 +50,8 @@ void display_object(Object object) {
             glUniform1f(light_uniforms[WAVE].material_shininess, materials[object.material].shininess);
             glActiveTexture(GL_TEXTURE0); // this addresses the first sampler2D uniform in the shader
             glBindTexture(GL_TEXTURE_2D, textures_data[object.textureID].allocatedID);
-            // there is a wave object in the shane call redisplay
+            glUniform1f(time_now, (float) glutGet(GLUT_ELAPSED_TIME));
+            // there is a wave object in the scene call redisplay
             glutPostRedisplay();
             break;
         case ShadingType::TEXTURE_ONLY:
