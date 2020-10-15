@@ -30,6 +30,7 @@ void main() {
     float freq = 0.001, amp = 0.1;
     vec4 pos = vec4(aPos, 1.0);
 
+    // 3d wave using sin(x) and sin(z)
     pos.y = amp * sin(freq * time + 10.0 * pos.x) * sin(freq * time + 10.0 * pos.z);
     gl_Position = P * V * M * pos;
 

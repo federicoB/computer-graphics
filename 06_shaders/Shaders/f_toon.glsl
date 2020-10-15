@@ -27,6 +27,7 @@ void main() {
     float intensity = dot(lightSourceDirection, normal);
 
     vec4 color;
+    //final color is based on thresolds of light intensities
     if (intensity > 0.9)
         color = vec4(material.diffuse, 1.0) * 1.5;
     else if (intensity > 0.5)

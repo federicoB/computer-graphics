@@ -2,7 +2,7 @@
 // Created by fede on 04/09/20.
 //
 
-const string MeshDir = "Mesh/";
+const string MeshDir = "03_model_viewer/Mesh/";
 
 // legge un file obj ed inizializza i vector della mesh in input
 void loadObjFile(string file_path, Mesh *mesh) {

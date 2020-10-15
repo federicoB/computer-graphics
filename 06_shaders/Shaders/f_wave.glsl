@@ -29,6 +29,8 @@ struct PointLight {
 uniform Material material;
 uniform PointLight light;
 
+//same as phong
+
 void main() {
     vec3 normal = normalize(N);
     vec3 lightSourceDirection = normalize(L);

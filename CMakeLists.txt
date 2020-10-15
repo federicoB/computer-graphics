@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 
 project(Computer-Graphics)
 
@@ -12,14 +12,14 @@ find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 include_directories( ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${GLEW_INCLUDE_DIR} ${glm_INCLUDE_DIRS})
 
-add_executable(01_bezier_curves 01_bezier_curves/bezier.cpp)
-target_link_libraries(01_bezier_curves ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY})
+add_executable(bezier 01_bezier_curves/bezier.cpp)
+target_link_libraries(bezier ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY})
 
+add_executable(model_viewer 03_model_viewer/main_students.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY. 03_model_viewer)
+target_link_libraries(model_viewer ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)
 
-add_executable(03_model_viewer 03_model_viewer/main_students.cpp)
-target_link_libraries(03_model_viewer ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)
-
-include_directories(06_shaders)
-add_executable(06_shaders 06_shaders/main_students.cpp)
+add_executable(shaders 06_shaders/main_students.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY 06_shaders)
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fpermissive")
-target_link_libraries(06_shaders ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)
+target_link_libraries(shaders ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} glm)
