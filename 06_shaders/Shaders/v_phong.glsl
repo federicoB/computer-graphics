@@ -27,11 +27,11 @@ uniform PointLight light;
 void main() {
     gl_Position = P * V * M * vec4(aPos, 1.0);
 
-    vec4 eyePosition = V * M * vec4(aPos, 1.0); // Position in VCS
-    vec4 eyeLightPos = V * vec4(light.position, 1.0); // LightPos in VCS
+    vec4 objPosVCS = V * M * vec4(aPos, 1.0); // Position in VCS
+    vec4 lightPosVCS = V * vec4(light.position, 1.0); // LightPos in VCS
 
     // Compute vectors E, L, N in VCS
-    E = normalize(-eyePosition.xyz);
-    L = normalize((eyeLightPos - eyePosition).xyz);
+    E = normalize(-objPosVCS.xyz);
+    L = normalize((lightPosVCS - objPosVCS).xyz);
     N = normalize(transpose(inverse(mat3(V * M))) * aNormal);
 }

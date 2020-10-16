@@ -4,7 +4,7 @@
 precision highp float;
 
 // Input vertex data, different for all executions of this shader.
-layout (location = 0) in vec3 vertex;
+layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 TexCoord;
 
@@ -19,7 +19,7 @@ uniform mat4 M; // position*rotation*scaling
 void main(){
 
 	// Output position of the vertex, in clip space : MVP * position
-	gl_Position =  P * V * M * vec4(vertex,1);
+	gl_Position =  P * V * M * vec4(position,1);
 
 	// we pass the texture coordinate to the fragment shader
 	_TexCoord = TexCoord;

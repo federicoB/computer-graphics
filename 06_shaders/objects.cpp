@@ -18,7 +18,6 @@ void init_sphere_FLAT() {
     Mesh sphereF = {};
     loadObjFile(MeshDir + "sphere_n_t_flat.obj", &sphereF);
     generate_and_load_buffers(true, &sphereF);
-    // Object Setup with NO texture, will use the light shader and a material for color and light behavior
     Object obj3 = {};
     obj3.mesh = sphereF;
     obj3.material = MaterialType::EMERALD;
@@ -33,7 +32,6 @@ void init_sphere_SMOOTH() {
     Mesh sphereS = {};
     loadObjFile(MeshDir + "sphere_n_t_smooth.obj", &sphereS);
     generate_and_load_buffers(true, &sphereS);
-    // Object Setup with NO texture, will use the light shader and a material for color and light behavior
     Object obj4 = {};
     obj4.mesh = sphereS;
     obj4.material = MaterialType::RED_PLASTIC;
@@ -175,7 +173,7 @@ void init_torus() {
     Object obj2 = {};
     obj2.mesh = torus;
     obj2.material = MaterialType::BRASS;
-    obj2.shading = ShadingType::TEXTURE_ONLY; // GOURAUD;
+    obj2.shading = ShadingType::TEXTURE_ONLY;
     obj2.name = "Torus";
     obj2.textureID = 5;
     obj2.model_matrix = glm::translate(glm::mat4(1), glm::vec3(5., 0., 5.));

@@ -37,13 +37,12 @@ void main()
     gl_Position = P * V * M * vec4(aPos, 1.0);
 
     // Position in VCS
-	vec4 eyePosition = V * M * vec4(aPos, 1.0);
+	vec4 objPosVCS = V * M * vec4(aPos, 1.0);
 	// LightPos in VCS
-	vec4 eyeLightPos = V * vec4(light.position, 1.0);
+	vec4 lightPosVCS = V * vec4(light.position, 1.0);
 
-	// Compute vectors E,L,N in VCS
-	vec3 E = -eyePosition.xyz;
-	vec3 L = (eyeLightPos - eyePosition).xyz;
+	// Compute vectors L,N in VCS
+	vec3 L = (lightPosVCS - objPosVCS).xyz;
 	vec3 N = transpose(inverse(mat3(V * M))) * aNormal;
 
     // ambient
@@ -56,7 +55,7 @@ void main()
     vec3 diffuse = light.power * light.color * (diff * material.diffuse);
 
     // specular
-    vec3 viewDir = normalize(E);
+    vec3 viewDir = normalize(-objPosVCS.xyz);
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular =  light.power * light.color * (spec * material.specular);  
