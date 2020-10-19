@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/federicoB/computer-graphics.svg?token=ARsqFbnmSqtxTfRHuZy8&branch=master)](https://travis-ci.com/federicoB/computer-graphics)
+
 Some OpenGL programs from Computer Graphics course assignments at University of Bologna.
 
 ![](https://i.imgur.com/xsZ8Y3u.png)
