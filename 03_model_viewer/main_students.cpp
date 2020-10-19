@@ -177,7 +177,7 @@ void init() {
             {0,0,0,0}
     };
 
-    for (unsigned int i=0; i< size(objectNames); i++) {
+    for (unsigned int i=0; i< sizeof(objectNames)/sizeof(objectNames[0]); i++) {
         string objectName = objectNames[i];
         // Mesh Loading
         Mesh mesh = {};
