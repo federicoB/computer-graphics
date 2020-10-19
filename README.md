@@ -15,4 +15,4 @@ Every project choosen + additional improvement not required that i added:
     - Procedural texture is implemented with a Julia fractal (you can generate new one pressing 'f' )
 
 
-I would like to thanks for the help [Serena Morigi](http://www.dm.unibo.it/~morigi/), [Matteo Berti](https://github.com/methk) and [Devid Farinelli](https://github.com/misterdev)
+I would like to thanks for the help [Serena Morigi](http://www.dm.unibo.it/~morigi/), [Matteo Berti](https://github.com/methk), [Devid Farinelli](https://github.com/misterdev) and [Giulio Colombini](https://github.com/GColom)
